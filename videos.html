@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="منصة THE BEST - عرض الفيديوهات التعليمية حسب المادة والمدرس والفصل." />
+  <meta name="keywords" content="فيديوهات تعليمية, مدرسين, مواد, منصة THE BEST" />
+  <title>الفيديوهات - منصة THE BEST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      padding: 20px;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #ffd700;
+      text-align: center;
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    /* رأس الصفحة */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    /* زر الرجوع الوحيد */
+    #back-arrow {
+      background: rgba(255, 215, 0, 0.1);
+      border: 2px solid #ffd700;
+      color: #ffd700;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+    }
+    #back-arrow:hover {
+      background: rgba(255, 215, 0, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+
+    /* تنسيق الفيديوهات */
+    #videos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .video-box {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+      overflow: hidden;
+    }
+
+    .video-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .video-title {
+      margin: 10px 0 6px 0;
+      font-size: 18px;
+      color: #ffd700;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .video-teacher {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #bbb;
+    }
+
+    .thumb {
+      position: relative;
+      cursor: pointer;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+
+    .thumb:hover {
+      opacity: 0.9;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumb .play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 50px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      transition: transform 0.3s;
+    }
+
+    .thumb:hover .play-btn {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .loading, .error {
+      text-align: center;
+      font-size: 18px;
+      color: #ffd700;
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      #videos-container {
+        grid-template-columns: 1fr;
+      }
+      .video-title {
+        font-size: 16px;
+      }
+      .thumb {
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <button id="back-arrow" title="رجوع">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h1>𝑽𝒊𝒅𝒆𝒐𝒔</h1>
+    <div style="width:42px;"></div> <!-- لتوازن التصميم -->
+  </div>
+
+  <div id="videos-container">
+    <div class="loading">⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
+      authDomain: "alamer-526ff.firebaseapp.com",
+      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
+      projectId: "alamer-526ff",
+      storageBucket: "alamer-526ff.firebasestorage.app",
+      messagingSenderId: "523879269039",
+      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const subject = urlParams.get('subject');
+    const teacher = urlParams.get('teacher');
+    const chapter = urlParams.get('chapter');
+
+    const videosContainer = document.getElementById('videos-container');
+    const backArrowBtn = document.getElementById('back-arrow');
+
+    // زر الرجوع الوحيد
+    backArrowBtn.onclick = () => {
+      if (subject) {
+        window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
+      } else {
+        window.location.href = 'subjects.html';
+      }
+    };
+
+    // دالة للتحقق من رابط YouTube
+    function isYouTubeUrl(url) {
+      return /youtu\.be|youtube\.com/.test(url);
+    }
+
+    // دالة لاستخراج ID الفيديو من YouTube
+    function getYouTubeId(url) {
+      try {
+        const u = new URL(url);
+        if (u.hostname.includes('youtu.be')) return u.pathname.replace('/', '');
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+        const m = u.pathname.match(/\/embed\/([^/?#]+)/);
+        return m ? m[1] : '';
+      } catch {
+        return '';
+      }
+    }
+
+    onValue(ref(db, 'videos'), (snapshot) => {
+      try {
+        const data = snapshot.val() || {};
+        if (!subject || !teacher || !chapter) {
+          videosContainer.innerHTML = '<div class="error">لم يتم تحديد المادة أو المدرس أو الباب.</div>';
+          return;
+        }
+
+        const videos = Object.values(data).filter(v =>
+          v.subject === subject &&
+          v.teacher === teacher &&
+          v.chapter === chapter
+        );
+
+        if (videos.length === 0) {
+          videosContainer.innerHTML = '<div class="error">لا توجد فيديوهات في هذا الباب.</div>';
+          return;
+        }
+
+        videosContainer.innerHTML = '';
+        videos.forEach(video => {
+          const box = document.createElement('div');
+          box.className = 'video-box';
+          const youtube = isYouTubeUrl(video.url);
+          const ytId = youtube ? getYouTubeId(video.url) : '';
+          const thumb = video.imageUrl || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : 'https://via.placeholder.com/300x200?text=VIDEO');
+
+          box.innerHTML = `
+            <div class="video-title">${video.title}</div>
+            <div class="video-teacher">المدرس: ${video.teacher} | ${video.chapter}</div>
+            <div class="thumb">
+              <img src="${thumb}" alt="صورة مصغرة للفيديو: ${video.title}" loading="lazy">
+              <div class="play-btn">▶</div>
+            </div>
+          `;
+
+          box.querySelector('.thumb').addEventListener('click', () => {
+            const videoPage = `player.html?url=${encodeURIComponent(video.url)}&title=${encodeURIComponent(video.title)}`;
+            window.location.href = videoPage;
+          });
+
+          videosContainer.appendChild(box);
+        });
+      } catch (error) {
+        console.error('خطأ في تحميل الفيديوهات:', error);
+        videosContainer.innerHTML = '<div class="error">حدث خطأ أثناء تحميل الفيديوهات.</div>';
+      }
+    }, (error) => {
+      console.error('خطأ في Firebase:', error);
+      videosContainer.innerHTML = '<div class="error">فشل الاتصال بقاعدة البيانات.</div>';
+    });
+  </script>
+</body>
+</html>
