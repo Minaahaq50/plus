@@ -158,9 +158,11 @@ async function loadVideos() {
       const box = document.createElement("div");
       box.className = "video-box";
       box.innerHTML = `<div class="video-title">${video.name}</div>`;
-      box.onclick = () => {
-      const sources = encodeURIComponent(JSON.stringify(video.links));
-    window.location.href = `player.html?sources=${sources}&title=${encodeURIComponent(video.name)}`;
+     box.onclick = () => {
+  const sources = encodeURIComponent(JSON.stringify(video.links));
+  window.location.href = `player.html?sources=${sources}&title=${encodeURIComponent(video.name)}`;
+};
+
 
 
       };
