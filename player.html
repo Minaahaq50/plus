@@ -1,126 +1,110 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>تشغيل الفيديو - منصة THE BEST</title>
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: radial-gradient(circle at top, #0a0a0a, #000);
-    color: #fff;
-    margin: 0;
-    text-align: center;
-    overflow-x: hidden;
-  }
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: #111; padding: 14px 18px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
-  }
-  .title { color: #ffd700; font-weight: 700; font-size: 18px; text-shadow: 0 0 8px #ffd700; }
-  .back { font-size: 22px; cursor: pointer; color: #ffd700; transition: transform 0.3s; }
-  .back:hover { transform: translateX(-5px); }
-  #player {
-    max-width: 950px; width: 100%; height: 60vh;
-    border-radius: 18px; margin: 25px auto;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-    background: #000;
-  }
-  .quality-list {
-    display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;
-    margin: 15px auto; max-width: 600px;
-  }
-  .quality-btn {
-    background: #1a1a1a; border: 1px solid #333; color: #ffd700;
-    padding: 8px 18px; border-radius: 8px; cursor: pointer;
-    font-weight: 600; transition: 0.3s;
-  }
-  .quality-btn.active, .quality-btn:hover {
-    background: #ffd700; color: #000; transform: scale(1.05);
-  }
-  .error-msg {
-    margin: 40px auto; color: #ff4d4d; font-size: 20px; font-weight: 700;
-    text-shadow: 0 0 8px #ff0000;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تشغيل الفيديو - منصة THE BEST</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #111;
+      box-shadow: 0 0 10px rgba(255,215,0,0.1);
+    }
+    .topbar span {
+      color: #ffd700;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .back {
+      color: #ffd700;
+      cursor: pointer;
+      font-size: 22px;
+    }
+    video {
+      width: 100%;
+      max-width: 960px;
+      border-radius: 12px;
+      margin: 30px auto;
+      display: block;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+      background: #000;
+    }
+  </style>
 </head>
 <body>
 
   <div class="topbar">
     <div class="back" onclick="history.back()">⬅</div>
-    <div class="title">🎬 تشغيل الفيديو</div>
-    <div style="width:25px;"></div>
+    <span>🎬 مشغل الفيديو</span>
+    <div style="width:30px;"></div>
   </div>
 
   <video id="player" playsinline controls></video>
-  <div id="qualities" class="quality-list"></div>
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
-    const title = params.get('title') || 'فيديو';
-    const url = params.get('url');
-    const allLinks = params.get('links'); // هنستقبل كل الجودات هنا بصيغة JSON (اختياري)
+    const title = params.get('title') || 'الفيديو';
+    const sourcesParam = params.get('sources'); // هنا بنستقبل كل الجودات
 
-    const playerEl = document.getElementById('player');
-    const qualityContainer = document.getElementById('qualities');
+    let sources = [];
 
-    if (!url && !allLinks) {
-      playerEl.style.display = 'none';
-      const err = document.createElement('div');
-      err.className = 'error-msg';
-      err.textContent = '⚠️ لم يتم تحديد رابط الفيديو.';
-      document.body.appendChild(err);
-    } else {
-      let sources = [];
-
-      // لو وصل كل الجودات في لينك JSON
-      if (allLinks) {
-        try {
-          const parsed = JSON.parse(decodeURIComponent(allLinks));
-          sources = parsed.map(v => ({ label: v.label, url: v.url }));
-        } catch {
-          sources = [{ label: 720, url }];
-        }
-      } else {
-        sources = [{ label: 720, url }];
+    try {
+      if (sourcesParam) {
+        sources = JSON.parse(decodeURIComponent(sourcesParam));
       }
+    } catch (err) {
+      console.error('خطأ في قراءة الجودات:', err);
+    }
 
-      // ترتيب الجودات من الأقل للأعلى
-      sources.sort((a, b) => a.label - b.label);
-
-      // تحميل Plyr
+    if (sources.length === 0) {
+      document.body.innerHTML = "<p style='color:#ffd700; margin-top:50px;'>⚠️ لا توجد روابط فيديو صالحة.</p>";
+    } else {
       const player = new Plyr('#player', {
         controls: [
-          'play-large', 'play', 'progress', 'current-time',
-          'mute', 'volume', 'captions', 'settings', 'fullscreen'
+          'play-large','play','progress','current-time',
+          'mute','volume','settings','pip','airplay','fullscreen'
         ],
-        ratio: '16:9'
+        settings: ['quality', 'speed', 'loop'],
+        quality: {
+          default: sources[sources.length - 1].label,
+          options: sources.map(s => s.label),
+          forced: true,
+          onChange: (q) => {
+            const selected = sources.find(s => s.label === q);
+            if (selected) {
+              player.source = {
+                type: 'video',
+                sources: [{ src: selected.url, type: 'video/mp4', size: q }]
+              };
+              player.play();
+            }
+          }
+        }
       });
 
-      // تشغيل أول جودة افتراضيًا
-      let currentUrl = sources[sources.length - 1].url;
-      player.source = { type: 'video', sources: [{ src: currentUrl, type: 'video/mp4' }] };
-
-      // إنشاء أزرار الجودات
-      qualityContainer.innerHTML = '';
-      sources.forEach((s, i) => {
-        const btn = document.createElement('div');
-        btn.className = 'quality-btn';
-        btn.textContent = `${s.label}p`;
-        if (i === sources.length - 1) btn.classList.add('active');
-        btn.onclick = () => {
-          document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          player.source = { type: 'video', sources: [{ src: s.url, type: 'video/mp4' }] };
-          player.play();
-        };
-        qualityContainer.appendChild(btn);
-      });
+      // إعداد أول فيديو
+      player.source = {
+        type: 'video',
+        title,
+        sources: sources.map(s => ({
+          src: s.url,
+          type: 'video/mp4',
+          size: s.label
+        }))
+      };
     }
   </script>
 </body>
