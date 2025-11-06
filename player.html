@@ -12,12 +12,10 @@ body {
   color: #fff;
   font-family: 'Poppins', sans-serif;
   margin: 0;
-  padding: 0;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
 }
 
 video {
@@ -35,12 +33,14 @@ select {
   background: #ffd700;
   color: #000;
   font-weight: bold;
+  cursor: pointer;
 }
 
 h1 {
   text-align: center;
   color: #ffd700;
   font-size: 1.4rem;
+  margin-bottom: 15px;
 }
 </style>
 </head>
@@ -61,14 +61,18 @@ document.getElementById("video-title").innerText = title;
 const video = document.getElementById("video-player");
 const select = document.getElementById("quality-select");
 
+// إنشاء قائمة الجودات
 sources.forEach((src) => {
   const option = document.createElement("option");
   option.value = src.url;
-  option.text = ${src.label}p;
+  option.text = `${src.label}p`; // ✅ ← هنا كان الخطأ
   select.appendChild(option);
 });
 
-video.src = select.value = sources[sources.length - 1].url; // أعلى جودة افتراضيًا
+console.log("Sources:", sources);
+
+// تشغيل أعلى جودة افتراضيًا
+video.src = select.value = sources[sources.length - 1].url;
 
 select.onchange = () => {
   video.src = select.value;
