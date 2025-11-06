@@ -57,7 +57,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const title = params.get('title') || 'الفيديو';
-    const sourcesParam = params.get('sources'); // هنا بنستقبل كل الجودات
+    const sourcesParam = params.get('sources');
 
     let sources = [];
 
@@ -87,7 +87,7 @@
             if (selected) {
               player.source = {
                 type: 'video',
-                sources: [{ src: selected.url, type: 'video/mp4', size: q }]
+                sources: [{ src: selected.url, type: 'application/x-mpegURL', size: q }]
               };
               player.play();
             }
@@ -101,7 +101,7 @@
         title,
         sources: sources.map(s => ({
           src: s.url,
-          type: 'video/mp4',
+          type: 'application/x-mpegURL',
           size: s.label
         }))
       };
