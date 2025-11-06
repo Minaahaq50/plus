@@ -95,19 +95,19 @@
   }
 
   li {
-    background:#1a1a1a;
-    margin:10px 0;
-    padding:15px;
-    border-radius:10px;
-    cursor:pointer;
-    text-align:center;
-    font-weight:bold;
-    color:#ffd700;
+    background: #1a1a1a;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    color: #ffd700;
     transition: background 0.3s, transform 0.3s;
   }
 
   li:hover {
-    background:#333;
+    background: #333;
     transform: translateY(-3px);
   }
 
@@ -153,14 +153,9 @@
     color: #333;
   }
 
-  #back {
-    color:#ffd700;
-    cursor:pointer;
-    text-align:center;
-    margin:15px auto;
-    display:block;
-    max-width:400px;
-    font-weight:bold;
+  #backBtn {
+    color: #ffd700;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -194,7 +189,7 @@ const subject = urlParams.get("subject");
 const teacher = urlParams.get("teacher");
 
 const chaptersList = document.getElementById("chapters-list");
-const backBtn = document.getElementById("back");
+const backBtn = document.getElementById("backBtn");
 
 // دالة لتوحيد النص (تزيل الاختلافات)
 function normalize(str) {
@@ -268,6 +263,23 @@ async function loadChapters() {
 }
 
 loadChapters();
+
+// 🌙 الوضع الليلي والإشعارات
+const toast = document.getElementById("toast");
+const notifyBtn = document.getElementById("notifyBtn");
+const darkToggle = document.getElementById("darkToggle");
+
+// إشعار عند الضغط على زر الإشعارات
+notifyBtn.onclick = () => {
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+};
+
+// تبديل الوضع الليلي / النهاري
+darkToggle.onclick = () => {
+  document.body.classList.toggle("light-mode");
+  darkToggle.classList.toggle("active");
+};
 </script>
 
 </body>
