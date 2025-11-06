@@ -406,41 +406,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+const subjectsList = document.getElementById('subjects-list');
 
-// ✅ الكود دا هيشتغل بس بعد التحقق
-document.addEventListener("authReady", () => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
-    authDomain: "alamer-526ff.firebaseapp.com",
-    databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
-    projectId: "alamer-526ff",
-    storageBucket: "alamer-526ff.firebasestorage.app",
-    messagingSenderId: "523879269039",
-    appId: "1:523879269039:web:634861aa34641bfebf8a5a",
-  };
+const subjectImages = {
+  "أحياء": "https://www2.0zz0.com/2025/09/30/15/923573836.png",
+  "فيزياء": "https://www2.0zz0.com/2025/09/30/15/161746092.jpeg",
+  "كيمياء": "https://www2.0zz0.com/2025/09/30/15/432614713.png",
+  "عربي": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
+  "إنجليزي": "https://www2.0zz0.com/2025/09/30/15/572118063.jpeg",
+  "جيولوجيا": "https://www2.0zz0.com/2025/10/01/19/835961815.jpeg",
+  "رياضه": "https://www2.0zz0.com/2025/10/05/19/620468277.jpeg",
+  "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg",
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const subjectsList = document.getElementById('subjects-list');
+async function loadSubjects() {
+  try {
+    // حمّل الملف JSON
+    const res = await fetch('coursatk_scraped_data.json');
+    const json = await res.json();
 
-  const subjectImages = {
-    "أحياء": "https://www2.0zz0.com/2025/11/03/16/425588580.jpg",
-    "فيزياء": "https://www2.0zz0.com/2025/11/03/16/155373686.jpg",
-    "كيمياء": "https://www2.0zz0.com/2025/11/03/16/286845048.jpg",
-    "عربي": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
-    "إنجليزي": "https://www2.0zz0.com/2025/11/03/16/386429473.jpg",
-    "جيولوجيا": "https://www2.0zz0.com/2025/11/03/22/343667596.jpg",
-    "رياضه": "https://www2.0zz0.com/2025/11/03/22/428968592.jpg",
-    "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg",
-  };
+    // حسب تركيب ملفك — غالبًا البيانات داخل data[]
+    const data = json.data || json;
 
-  onValue(ref(db, 'videos'), snapshot => {
-    const data = snapshot.val() || {};
+    // استخراج أسماء المواد
     const subjects = new Set();
-
-    Object.values(data).forEach(v => { if (v.subject) subjects.add(v.subject); });
+    (data || []).forEach(year => {
+      (year.subjects || []).forEach(sub => {
+        subjects.add(sub.subject_name || sub.subjectName || sub.name);
+      });
+    });
 
     subjectsList.innerHTML = '';
 
@@ -453,69 +447,64 @@ document.addEventListener("authReady", () => {
       const li = document.createElement('li');
       const circle = document.createElement('div');
       circle.className = 'circle';
-
       const img = document.createElement('img');
       img.src = subjectImages[subject] || 'https://img.icons8.com/ios-filled/100/ffd700/book.png';
-      img.alt = subject;
       circle.appendChild(img);
-
       const span = document.createElement('span');
       span.textContent = subject;
-
       li.appendChild(circle);
       li.appendChild(span);
-
-      li.onclick = () => {
-        window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
-      };
-
+      li.onclick = () => window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
       subjectsList.appendChild(li);
     });
-    showToast("✅ تم تحميل المواد بنجاح", "success");
-  }, error => {
-    console.error(error);
-    subjectsList.innerHTML = '<li class="loading">⚠️ خطأ في تحميل البيانات</li>';
-    showToast("❌ فشل الاتصال بـ Firebase", "error");
-  });
 
+    showToast("✅ تم تحميل المواد بنجاح");
+  } catch (err) {
+    subjectsList.innerHTML = `<li class="loading">❌ فشل تحميل البيانات</li>`;
+    console.error(err);
+  }
+}
 
-    // ✅ Toast
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+// 🟡 Toast
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.className = "show";
+  setTimeout(() => toast.className = toast.className.replace("show", ""), 3000);
+}
+
+// 🌓 وضع النهار/الليل
+const toggle = document.getElementById("darkToggle");
+toggle.addEventListener("click", () => {
+  toggle.classList.toggle("active");
+  document.body.classList.toggle("light-mode");
+});
+
+// 📤 زر المشاركة
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "تطبيق دروسك أون لاين",
+        text: "جرب تطبيق دروسك أون لاين 2026 📚✨",
+        url: window.location.href
+      });
+    } catch {
+      showToast("❌ تم إلغاء المشاركة");
     }
+  } else {
+    showToast("المشاركة غير مدعومة في متصفحك 😢");
+  }
+});
 
-    // ✅ زر الوضع الليلي والفاتح
-    const toggle = document.getElementById("darkToggle");
-    toggle.addEventListener("click", () => {
-      toggle.classList.toggle("active");
-      document.body.classList.toggle("light-mode");
-    });
+// 🔔 زر الإشعارات
+document.getElementById("notifyBtn").addEventListener("click", () => {
+  showToast("الإشعارات هتتفعل قريبًا 🔔✨");
+});
 
-    // ✅ زر المشاركة
-    document.getElementById("shareBtn").addEventListener("click", async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "تطبيق دروسك أون لاين",
-            text: "جرب تطبيق دروسك أون لاين 2026 📚✨",
-            url: window.location.href
-          });
-        } catch (err) {
-          showToast("❌ تم إلغاء المشاركة");
-        }
-      } else {
-        showToast("المشاركة غير مدعومة في متصفحك 😢");
-      }
-    });
-
-    // ✅ زر الإشعارات → Toast
-    document.getElementById("notifyBtn").addEventListener("click", () => {
-      showToast("الإشعارات هتتفعل قريبًا 🔔✨");
-    });
-  }); // ← ختام الحدث هنا فقط
+// 🚀 تشغيل تحميل المواد
+loadSubjects();
 </script>
+</body>
 </body>
 </html>
