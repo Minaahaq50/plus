@@ -263,18 +263,23 @@ async function loadVideos() {
         <div class="video-icon">🎥</div>
         <div class="video-title">${video.name}</div>
       `;
-     box.onclick = () => {
-  // نختار أعلى جودة (أكبر label)
-  const bestLink = video.links.reduce((prev, current) => {
-    return (parseInt(current.label) > parseInt(prev.label)) ? current : prev;
-  });
+    box.onclick = () => {
+  // نبحث عن لينك الجودة 720
+  let selected = video.links.find(link => parseInt(link.label) === 720);
 
-  // نحفظه في localStorage
-  localStorage.setItem("video_sources", JSON.stringify(bestLink));
+  // لو مش موجود 720، نختار أعلى جودة متوفرة
+  if (!selected) {
+    selected = video.links.reduce((prev, current) => {
+      return parseInt(current.label) > parseInt(prev.label) ? current : prev;
+    });
+  }
+
+  // نحفظ الجودة المختارة فقط
+  localStorage.setItem("video_sources", JSON.stringify(selected));
   localStorage.setItem("video_title", video.name);
 
-  // ننتقل للمشغل
-  window.location.href = `player.html`;
+  // نفتح صفحة المشغل
+  window.location.href = "player.html";
 };
 
 
