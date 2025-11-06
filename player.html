@@ -24,6 +24,7 @@ video {
   border: 2px solid #ffd700;
   border-radius: 12px;
   margin-bottom: 20px;
+  background: #111;
 }
 
 select {
@@ -48,8 +49,10 @@ h1 {
 
 <h1 id="video-title">🎬 جاري التحميل...</h1>
 <video id="video-player" controls></video>
-
 <select id="quality-select"></select>
+
+<!-- ✅ مكتبة تشغيل HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
 try {
@@ -66,20 +69,38 @@ try {
   sources.forEach((src) => {
     const option = document.createElement("option");
     option.value = src.url;
-    option.text = `${src.label}p`; // ✅ تم إصلاح الخطأ هنا
+    option.text = `${src.label}p`;
     select.appendChild(option);
   });
 
   // تشغيل أعلى جودة افتراضيًا
-  video.src = select.value = sources[sources.length - 1].url;
+  let currentUrl = sources[sources.length - 1].url;
+  playVideo(currentUrl);
 
   select.onchange = () => {
-    video.src = select.value;
-    video.play();
+    currentUrl = select.value;
+    playVideo(currentUrl);
   };
+
+  function playVideo(url) {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play();
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // لأجهزة Apple (Safari)
+      video.src = url;
+      video.play();
+    } else {
+      alert("المتصفح لا يدعم تشغيل هذا النوع من الفيديوهات (m3u8).");
+    }
+  }
 } catch (err) {
   console.error("❌ خطأ في تحميل الفيديو:", err);
-  alert("حدث خطأ أثناء تحميل الفيديو. تأكد من صحة البيانات في الرابط.");
+  alert("حدث خطأ أثناء تحميل الفيديو.");
 }
 </script>
 
