@@ -167,109 +167,95 @@
     <div class="loading">⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+<script type="module">
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get("subject");
+const teacher = urlParams.get("teacher");
+const chapter = urlParams.get("chapter");
+const lecture = urlParams.get("lecture");
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
-      authDomain: "alamer-526ff.firebaseapp.com",
-      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
-      projectId: "alamer-526ff",
-      storageBucket: "alamer-526ff.firebasestorage.app",
-      messagingSenderId: "523879269039",
-      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
-    };
+const videosContainer = document.getElementById("videos-container");
+const backBtn = document.getElementById("back");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+backBtn.onclick = () => {
+  if (lecture) {
+    window.location.href = `lectures.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
+  } else {
+    window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
+  }
+};
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const subject = urlParams.get('subject');
-    const teacher = urlParams.get('teacher');
-    const chapter = urlParams.get('chapter');
+// توحيد النصوص
+function normalize(str) {
+  return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
+}
 
-    const videosContainer = document.getElementById('videos-container');
-    const backArrowBtn = document.getElementById('back-arrow');
+async function loadVideos() {
+  if (!subject || !teacher || !chapter) {
+    videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</div>";
+    return;
+  }
 
-    // زر الرجوع الوحيد
-    backArrowBtn.onclick = () => {
-      if (subject) {
-        window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
-      } else {
-        window.location.href = 'subjects.html';
-      }
-    };
+  const res = await fetch("coursatk_scraped_data.json");
+  const json = await res.json();
+  const data = json.data || json;
 
-    // دالة للتحقق من رابط YouTube
-    function isYouTubeUrl(url) {
-      return /youtu\.be|youtube\.com/.test(url);
-    }
+  const wantedSubject = normalize(subject);
+  const wantedTeacher = normalize(teacher);
+  const wantedChapter = normalize(chapter);
+  const wantedLecture = normalize(lecture);
+  const videos = [];
 
-    // دالة لاستخراج ID الفيديو من YouTube
-    function getYouTubeId(url) {
-      try {
-        const u = new URL(url);
-        if (u.hostname.includes('youtu.be')) return u.pathname.replace('/', '');
-        if (u.searchParams.get('v')) return u.searchParams.get('v');
-        const m = u.pathname.match(/\/embed\/([^/?#]+)/);
-        return m ? m[1] : '';
-      } catch {
-        return '';
-      }
-    }
-
-    onValue(ref(db, 'videos'), (snapshot) => {
-      try {
-        const data = snapshot.val() || {};
-        if (!subject || !teacher || !chapter) {
-          videosContainer.innerHTML = '<div class="error">لم يتم تحديد المادة أو المدرس أو الباب.</div>';
-          return;
-        }
-
-        const videos = Object.values(data).filter(v =>
-          v.subject === subject &&
-          v.teacher === teacher &&
-          v.chapter === chapter
-        );
-
-        if (videos.length === 0) {
-          videosContainer.innerHTML = '<div class="error">لا توجد فيديوهات في هذا الباب.</div>';
-          return;
-        }
-
-        videosContainer.innerHTML = '';
-        videos.forEach(video => {
-          const box = document.createElement('div');
-          box.className = 'video-box';
-          const youtube = isYouTubeUrl(video.url);
-          const ytId = youtube ? getYouTubeId(video.url) : '';
-          const thumb = video.imageUrl || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : 'https://via.placeholder.com/300x200?text=VIDEO');
-
-          box.innerHTML = `
-            <div class="video-title">${video.title}</div>
-            <div class="video-teacher">المدرس: ${video.teacher} | ${video.chapter}</div>
-            <div class="thumb">
-              <img src="${thumb}" alt="صورة مصغرة للفيديو: ${video.title}" loading="lazy">
-              <div class="play-btn">▶</div>
-            </div>
-          `;
-
-          box.querySelector('.thumb').addEventListener('click', () => {
-            const videoPage = `player.html?url=${encodeURIComponent(video.url)}&title=${encodeURIComponent(video.title)}`;
-            window.location.href = videoPage;
-          });
-
-          videosContainer.appendChild(box);
+  (data || []).forEach((year) => {
+    (year.subjects || []).forEach((sub) => {
+      if (normalize(sub.subject_name).includes(wantedSubject)) {
+        (sub.teachers || []).forEach((t) => {
+          if (normalize(t.teacher_name).includes(wantedTeacher)) {
+            (t.chapters || []).forEach((chap) => {
+              if (normalize(chap.chapter_name).includes(wantedChapter)) {
+                (chap.lectures || []).forEach((lec) => {
+                  if (!lecture || normalize(lec.lecture_name).includes(wantedLecture)) {
+                    (lec.videos || []).forEach((vid) => {
+                      const link = vid.links?.[vid.links.length - 1]?.url;
+                      if (link) {
+                        videos.push({
+                          name: vid.video_name,
+                          link
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
         });
-      } catch (error) {
-        console.error('خطأ في تحميل الفيديوهات:', error);
-        videosContainer.innerHTML = '<div class="error">حدث خطأ أثناء تحميل الفيديوهات.</div>';
       }
-    }, (error) => {
-      console.error('خطأ في Firebase:', error);
-      videosContainer.innerHTML = '<div class="error">فشل الاتصال بقاعدة البيانات.</div>';
     });
-  </script>
+  });
+
+  videosContainer.innerHTML = "";
+
+  if (videos.length === 0) {
+    videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لا توجد فيديوهات في هذه المحاضرة.</div>";
+    return;
+  }
+
+  videos.forEach((video) => {
+    const box = document.createElement("div");
+    box.className = "video-box";
+    box.innerHTML = `
+      <img class="video-thumb" src="https://img.icons8.com/fluency/300/video.png" alt="video">
+      <div class="video-title">${video.name}</div>
+    `;
+    box.onclick = () => {
+      window.location.href = `player.html?url=${encodeURIComponent(video.link)}&title=${encodeURIComponent(video.name)}`;
+    };
+    videosContainer.appendChild(box);
+  });
+}
+
+loadVideos();
+</script>
 </body>
 </html>
