@@ -176,7 +176,7 @@
     const videosContainer = document.getElementById("videos-container");
     const backBtn = document.getElementById("back-arrow");
 
-    // ✅ قائمة صور المدرسين
+    // ✅ صور للمدرسين
     const teacherThumbs = {
       "أ. رضا الفاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
       "أ. أحمد أيمن": "https://www2.0zz0.com/2025/09/30/16/773990567.jpeg",
@@ -185,7 +185,7 @@
       "أ. جون جهبذ": "https://www2.0zz0.com/2025/09/30/16/456815270.jpeg"
     };
 
-    // ✅ زر العودة
+    // زر العودة
     backBtn.onclick = () => {
       if (lecture) {
         window.location.href = `lectures.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
@@ -194,12 +194,12 @@
       }
     };
 
-    // ✅ توحيد النصوص
+    // توحيد النصوص
     function normalize(str) {
       return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
     }
 
-    // ✅ تحميل الفيديوهات من الملف
+    // تحميل الفيديوهات
     async function loadVideos() {
       if (!subject || !teacher || !chapter) {
         videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</div>";
@@ -227,11 +227,14 @@
                       (chap.lectures || []).forEach((lec) => {
                         if (!lecture || normalize(lec.lecture_name).includes(wantedLecture)) {
                           (lec.videos || []).forEach((vid) => {
-                            const link = vid.links?.[vid.links.length - 1]?.url;
-                            if (link) {
+                            if (vid.links && vid.links.length > 0) {
+                              const qualities = vid.links.map(q => ({
+                                label: q.label,
+                                url: q.url
+                              }));
                               videos.push({
                                 name: vid.video_name,
-                                link
+                                qualities
                               });
                             }
                           });
@@ -268,7 +271,8 @@
             </div>
           `;
           box.onclick = () => {
-            window.location.href = `player.html?url=${encodeURIComponent(video.link)}&title=${encodeURIComponent(video.name)}`;
+            const sources = encodeURIComponent(JSON.stringify(video.qualities));
+            window.location.href = `player.html?sources=${sources}&title=${encodeURIComponent(video.name)}`;
           };
           videosContainer.appendChild(box);
         });
