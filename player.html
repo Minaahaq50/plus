@@ -170,21 +170,29 @@
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
-    const params = new URLSearchParams(window.location.search);
-   let url = null;
-const sourcesParam = params.get('sources');
+    let qualitySources = [];
+let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
+const savedSources = localStorage.getItem("video_sources");
 
-if (sourcesParam) {
+if (savedSources) {
   try {
-    const sources = JSON.parse(decodeURIComponent(sourcesParam));
-    // خذ أول رابط فيديو كافتراضي
-    url = sources[0];
-  } catch {
-    console.error("Invalid sources data");
+    const links = JSON.parse(savedSources);
+    if (Array.isArray(links)) {
+      qualitySources = links.map((link, i) => ({
+        src: link,
+        type: "video/mp4",
+        size: i === 0 ? 1080 : i === 1 ? 720 : 480
+      }));
+    } else {
+      qualitySources = [{ src: links, type: "video/mp4" }];
+    }
+  } catch (err) {
+    console.error("❌ Error parsing savedSources:", err);
   }
 } else {
-  url = params.get('url');
+  document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
 }
+
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
