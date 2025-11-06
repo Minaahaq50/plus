@@ -67,12 +67,13 @@
 
     .video-box {
       background: #1a1a1a;
-      padding: 15px;
+      padding: 10px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
       transition: transform 0.3s ease-in-out, box-shadow 0.3s;
       overflow: hidden;
       text-align: center;
+      position: relative;
     }
 
     .video-box:hover {
@@ -80,20 +81,55 @@
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
     }
 
-    .video-title {
-      margin: 10px 0 6px 0;
-      font-size: 18px;
-      color: #ffd700;
-      font-weight: 700;
+    .thumb-wrapper {
+      position: relative;
     }
 
     .video-thumb {
       width: 100%;
       height: 200px;
-      object-fit: contain;
-      background: #000;
+      object-fit: cover;
       border-radius: 10px;
-      padding: 10px;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .thumb-wrapper:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay i {
+      font-size: 50px;
+      color: #ffd700;
+    }
+
+    .video-info {
+      padding: 10px 5px;
+    }
+
+    .video-title {
+      font-size: 18px;
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    .video-meta {
+      font-size: 14px;
+      color: #bbb;
+      margin-top: 5px;
     }
 
     .loading {
@@ -111,7 +147,7 @@
         font-size: 16px;
       }
       .video-thumb {
-        height: 150px;
+        height: 160px;
       }
     }
   </style>
@@ -127,7 +163,7 @@
   </div>
 
   <div id="videos-container">
-    <div class="loading">⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</div>
+    <div class="loading">⏳ جاري تحميل الفيديوهات...</div>
   </div>
 
   <script type="module">
@@ -139,6 +175,15 @@
 
     const videosContainer = document.getElementById("videos-container");
     const backBtn = document.getElementById("back-arrow");
+
+    // ✅ قائمة صور المدرسين
+    const teacherThumbs = {
+      "أ. رضا الفاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
+      "أ. أحمد أيمن": "https://www2.0zz0.com/2025/09/30/16/773990567.jpeg",
+      "أ. وائل ميلاد": "https://www2.0zz0.com/2025/09/30/16/168143044.jpeg",
+      "أ. عبد المعبود": "https://www2.0zz0.com/2025/09/30/16/576331510.jpeg",
+      "أ. جون جهبذ": "https://www2.0zz0.com/2025/09/30/16/456815270.jpeg"
+    };
 
     // ✅ زر العودة
     backBtn.onclick = () => {
@@ -154,7 +199,7 @@
       return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
     }
 
-    // ✅ تحميل الفيديوهات
+    // ✅ تحميل الفيديوهات من الملف
     async function loadVideos() {
       if (!subject || !teacher || !chapter) {
         videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</div>";
@@ -207,12 +252,20 @@
           return;
         }
 
+        const thumb = teacherThumbs[teacher] || "https://img.icons8.com/fluency/300/youtube-play.png";
+
         videos.forEach((video) => {
           const box = document.createElement("div");
           box.className = "video-box";
           box.innerHTML = `
-            <img class="video-thumb" src="https://img.icons8.com/fluency/300/video.png" alt="video">
-            <div class="video-title">${video.name}</div>
+            <div class="thumb-wrapper">
+              <img class="video-thumb" src="${thumb}" alt="video">
+              <div class="overlay"><i class="fas fa-play-circle"></i></div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">${video.name}</div>
+              <div class="video-meta">${teacher} • ${chapter}</div>
+            </div>
           `;
           box.onclick = () => {
             window.location.href = `player.html?url=${encodeURIComponent(video.link)}&title=${encodeURIComponent(video.name)}`;
