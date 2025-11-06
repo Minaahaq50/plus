@@ -169,119 +169,62 @@
   <div id="toast">🚧 سيتم إضافة هذه الميزة قريبًا 🔜</div>
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-  <script>
-    let qualitySources = [];
-let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
-const savedSources = localStorage.getItem("video_sources");
+<script>
+  // 🔹 قراءة البيانات من localStorage
+  let qualitySources = [];
+  let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
+  const savedSources = localStorage.getItem("video_sources");
 
-if (savedSources) {
-  try {
-    const links = JSON.parse(savedSources);
-    if (Array.isArray(links)) {
-      qualitySources = links.map((link, i) => ({
-        src: link,
-        type: "video/mp4",
-        size: i === 0 ? 1080 : i === 1 ? 720 : 480
-      }));
-    } else {
-      qualitySources = [{ src: links, type: "video/mp4" }];
-    }
-  } catch (err) {
-    console.error("❌ Error parsing savedSources:", err);
-  }
-} else {
-  document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
-}
-
-
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    const playerElement = document.getElementById('player');
-
-    function getYouTubeID(link) {
-      try {
-        const u = new URL(link);
-        if (u.hostname === 'youtu.be') return u.pathname.slice(1);
-        if (u.hostname.includes('youtube.com')) {
-          return u.searchParams.get('v') || (u.pathname.match(/\/embed\/([^/?#]+)/) || [])[1];
-        }
-        return null;
-      } catch {
-        return null;
-      }
-    }
-
-    if (!url) {
-      playerElement.style.display = 'none';
-      const errorEl = document.createElement('p');
-      errorEl.className = 'error-msg';
-      errorEl.textContent = 'لم يتم تحديد رابط الفيديو 😢';
-      document.body.insertBefore(errorEl, document.querySelector('.external'));
-    } else {
-      const ytID = getYouTubeID(url);
-
-      if (ytID) {
-        if (isMobile) {
-          // ✅ على الموبايل شغل iframe (amform)
-          const iframe = document.createElement("iframe");
-          iframe.src = `https://www.youtube.com/embed/${ytID}?autoplay=1&modestbranding=1&rel=0&playsinline=1`;
-          iframe.width = "100%";
-          iframe.height = "100%";
-          iframe.style.border = "none";
-          iframe.allow = "autoplay; fullscreen";
-          playerElement.replaceWith(iframe);
-        } else {
-          // ✅ على اللابتوب شغل نظام Plyr.io
-          const player = new Plyr('#player', {
-            controls: [
-              'play-large', 'play', 'progress', 'current-time',
-              'mute', 'volume', 'captions', 'settings',
-              'pip', 'airplay', 'fullscreen'
-            ],
-            settings: ['quality', 'speed', 'loop'],
-            ratio: '16:9'
-          });
-          player.source = {
-            type: 'video',
-            sources: [{
-              src: ytID,
-              provider: 'youtube',
-            }]
-          };
-        }
+  if (savedSources) {
+    try {
+      const links = JSON.parse(savedSources);
+      if (Array.isArray(links)) {
+        qualitySources = links.map((link, i) => ({
+          src: link,
+          type: "video/mp4",
+          size: i === 0 ? 1080 : i === 1 ? 720 : 480
+        }));
       } else {
-        // 🎬 فيديو عادي (MP4)
-        const player = new Plyr('#player', {
-          controls: [
-            'play-large', 'play', 'progress', 'current-time',
-            'mute', 'volume', 'captions', 'settings',
-            'pip', 'airplay', 'fullscreen'
-          ],
-          settings: ['quality', 'speed', 'loop'],
-          ratio: '16:9'
-        });
-        player.source = {
-          type: 'video',
-          sources: [{
-            src: url,
-            type: 'video/mp4',
-          }]
-        };
+        qualitySources = [{ src: links, type: "video/mp4" }];
       }
+    } catch (err) {
+      console.error("❌ Error parsing savedSources:", err);
+      document.body.innerHTML = "<div class='error-msg'>حدث خطأ في قراءة روابط الفيديو 😢</div>";
     }
+  } else {
+    document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
+  }
 
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
-    }
+  // 🔹 إنشاء مشغل الفيديو Plyr
+  const player = new Plyr('#player', {
+    controls: [
+      'play-large','play','progress','current-time',
+      'mute','volume','settings','fullscreen'
+    ],
+    settings: ['quality','speed','loop']
+  });
 
-    document.querySelectorAll(".app-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
-      });
+  // 🔹 تحديد مصدر الفيديو
+  player.source = {
+    type: 'video',
+    title: videoTitle,
+    sources: qualitySources
+  };
+
+  // 🔹 Toast إشعارات التطبيقات
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
+
+  document.querySelectorAll(".app-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
