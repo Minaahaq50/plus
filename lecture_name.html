@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الأبواب - منصة THE BEST</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: #121212;
+    color: #fff;
+    padding: 80px 15px 30px;
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ===== الشريط العلوي ===== */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111;
+    padding: 10px 15px;
+    color: white;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .menu-btn {
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .title {
+    font-size: 14px;
+    color: #f36;
+  }
+
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .icons img {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+  }
+
+  .toggle-dark {
+    background: #fff;
+    border-radius: 12px;
+    width: 40px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .toggle-dark::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #111;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .toggle-dark.active::after {
+    left: 22px;
+    background: #ff0;
+  }
+
+  h1 {
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px #ffd700;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  li {
+    background:#1a1a1a;
+    margin:10px 0;
+    padding:15px;
+    border-radius:10px;
+    cursor:pointer;
+    text-align:center;
+    font-weight:bold;
+    color:#ffd700;
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  li:hover {
+    background:#333;
+    transform: translateY(-3px);
+  }
+
+  #toast {
+    visibility: hidden;
+    min-width: 260px;
+    background: #1e1e1e;
+    color: #ffd700;
+    text-align: center;
+    border-radius: 12px;
+    padding: 14px;
+    position: fixed;
+    z-index: 2000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+  }
+  #toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+  }
+
+  body.light-mode {
+    background: #f5f5f5;
+    color: #000;
+  }
+  body.light-mode .topbar {
+    background: #fff;
+    color: #000;
+  }
+  body.light-mode li {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  body.light-mode #toast {
+    background: #fff;
+    color: #333;
+  }
+
+  #back {
+    color:#ffd700;
+    cursor:pointer;
+    text-align:center;
+    margin:15px auto;
+    display:block;
+    max-width:400px;
+    font-weight:bold;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ✅ الشريط العلوي -->
+  <div class="topbar">
+    <div class="menu-btn" id="backBtn">⬅</div>
+    <div class="title">𝑪𝒉𝒂𝒑𝒕𝒆𝒓𝒔 & 𝑪𝒂𝒎𝒑𝒔</div>
+    <div class="icons">
+      <div class="toggle-dark" id="darkToggle"></div>
+      <a href="" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+      </a>
+      <img id="shareBtn" src="https://cdn-icons-png.flaticon.com/512/929/929610.png" alt="Share">
+      <img id="notifyBtn" src="https://cdn-icons-png.flaticon.com/512/1827/1827272.png" alt="Notification">
+    </div>
+  </div>
+
+  <!-- ✅ Toast -->
+  <div id="toast">الإشعارات هتتفعل قريبًا 🔔✨</div>
+
+  <h1>𝑪𝒉𝒂𝒑𝒕𝒆𝒓𝒔 & 𝑪𝒂𝒎𝒑𝒔</h1>
+  <ul id="chapters-list">
+    <li>⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</li>
+  </ul>
+
+<script type="module">
+// استخراج البيانات من الرابط
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get("subject");
+const teacher = urlParams.get("teacher");
+const chapter = urlParams.get("chapter");
+
+const lecturesList = document.getElementById("lectures-list");
+const backBtn = document.getElementById("back");
+
+// زر العودة
+backBtn.onclick = () => {
+  window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
+};
+
+// دالة لتطبيع النصوص للمقارنة الدقيقة
+function normalize(str) {
+  return (str || "")
+    .trim()
+    .replace(/[.\s]/g, "")
+    .replace(/[أإآا]/g, "ا")
+    .toLowerCase();
+}
+
+// تحميل الدروس من الملف
+async function loadLectures() {
+  if (!subject || !teacher || !chapter) {
+    lecturesList.innerHTML = "<li>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</li>";
+    return;
+  }
+
+  try {
+    const res = await fetch("coursatk_scraped_data.json");
+    const json = await res.json();
+    const data = json.data || json;
+
+    const wantedSubject = normalize(subject);
+    const wantedTeacher = normalize(teacher);
+    const wantedChapter = normalize(chapter);
+
+    const lectures = [];
+
+    (data || []).forEach(year => {
+      (year.subjects || []).forEach(sub => {
+        if (normalize(sub.subject_name) === wantedSubject) {
+          (sub.teachers || []).forEach(t => {
+            if (normalize(t.teacher_name) === wantedTeacher) {
+              (t.chapters || []).forEach(ch => {
+                if (normalize(ch.chapter_name) === wantedChapter) {
+                  (ch.lectures || []).forEach(lec => {
+                    if (lec.lecture_name) {
+                      lectures.push(lec.lecture_name);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+
+    lecturesList.innerHTML = "";
+
+    if (lectures.length === 0) {
+      lecturesList.innerHTML = "<li>⚠️ لا توجد دروس في هذا الباب.</li>";
+      return;
+    }
+
+    lectures.forEach(lecture => {
+      const li = document.createElement("li");
+      li.textContent = lecture;
+      li.onclick = () => {
+        window.location.href = `videos.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}&lecture=${encodeURIComponent(lecture)}`;
+      };
+      lecturesList.appendChild(li);
+    });
+
+  } catch (err) {
+    console.error("❌ خطأ أثناء تحميل البيانات:", err);
+    lecturesList.innerHTML = "<li>❌ حدث خطأ أثناء تحميل البيانات.</li>";
+  }
+}
+
+loadLectures();
+</script>
+
+</body>
+</html>
