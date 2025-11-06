@@ -171,7 +171,21 @@
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
-    const url = params.get('url');
+   let url = null;
+const sourcesParam = params.get('sources');
+
+if (sourcesParam) {
+  try {
+    const sources = JSON.parse(decodeURIComponent(sourcesParam));
+    // خذ أول رابط فيديو كافتراضي
+    url = sources[0];
+  } catch {
+    console.error("Invalid sources data");
+  }
+} else {
+  url = params.get('url');
+}
+
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     const playerElement = document.getElementById('player');
