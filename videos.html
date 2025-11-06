@@ -263,11 +263,20 @@ async function loadVideos() {
         <div class="video-icon">🎥</div>
         <div class="video-title">${video.name}</div>
       `;
-      box.onclick = () => {
-        localStorage.setItem("video_sources", JSON.stringify(video.links));
-        localStorage.setItem("video_title", video.name);
-        window.location.href = "player.html";
-      };
+     box.onclick = () => {
+  // نختار أعلى جودة (أكبر label)
+  const bestLink = video.links.reduce((prev, current) => {
+    return (parseInt(current.label) > parseInt(prev.label)) ? current : prev;
+  });
+
+  // نحفظه في localStorage
+  localStorage.setItem("video_sources", JSON.stringify(bestLink));
+  localStorage.setItem("video_title", video.name);
+
+  // ننتقل للمشغل
+  window.location.href = `player.html`;
+};
+
 
       videosContainer.appendChild(box);
     });
