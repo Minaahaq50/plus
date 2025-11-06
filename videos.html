@@ -183,7 +183,7 @@
 
     backBtn.onclick = () => {
       if (lecture) {
-        window.location.href = `lectures.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
+        window.location.href = `lecture_name.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
       } else {
         window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
       }
