@@ -36,7 +36,6 @@
       margin-bottom: 25px;
     }
 
-    /* زر الرجوع */
     #back-arrow {
       background: rgba(255, 215, 0, 0.1);
       border: 2px solid #ffd700;
@@ -81,6 +80,13 @@
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
     }
 
+    .video-title {
+      font-size: 18px;
+      color: #ffd700;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
     .thumb-wrapper {
       position: relative;
     }
@@ -116,20 +122,10 @@
       color: #ffd700;
     }
 
-    .video-info {
-      padding: 10px 5px;
-    }
-
-    .video-title {
-      font-size: 18px;
-      color: #ffd700;
-      font-weight: 700;
-    }
-
     .video-meta {
       font-size: 14px;
       color: #bbb;
-      margin-top: 5px;
+      margin-top: 8px;
     }
 
     .loading {
@@ -176,7 +172,7 @@
     const videosContainer = document.getElementById("videos-container");
     const backBtn = document.getElementById("back-arrow");
 
-    // ✅ صور للمدرسين
+    // ✅ صور المدرسين
     const teacherThumbs = {
       "أ. رضا الفاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
       "أ. أحمد أيمن": "https://www2.0zz0.com/2025/09/30/16/773990567.jpeg",
@@ -185,7 +181,6 @@
       "أ. جون جهبذ": "https://www2.0zz0.com/2025/09/30/16/456815270.jpeg"
     };
 
-    // زر العودة
     backBtn.onclick = () => {
       if (lecture) {
         window.location.href = `lectures.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
@@ -194,12 +189,10 @@
       }
     };
 
-    // توحيد النصوص
     function normalize(str) {
       return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
     }
 
-    // تحميل الفيديوهات
     async function loadVideos() {
       if (!subject || !teacher || !chapter) {
         videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</div>";
@@ -261,14 +254,12 @@
           const box = document.createElement("div");
           box.className = "video-box";
           box.innerHTML = `
+            <div class="video-title">${video.name}</div>
             <div class="thumb-wrapper">
               <img class="video-thumb" src="${thumb}" alt="video">
               <div class="overlay"><i class="fas fa-play-circle"></i></div>
             </div>
-            <div class="video-info">
-              <div class="video-title">${video.name}</div>
-              <div class="video-meta">${teacher} • ${chapter}</div>
-            </div>
+            <div class="video-meta">${teacher} • ${chapter}</div>
           `;
           box.onclick = () => {
             const sources = encodeURIComponent(JSON.stringify(video.qualities));
