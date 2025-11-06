@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // أول مرة فقط
-    const dbUrl = "https://alamer-526ff-default-rtdb.firebaseio.com/approvedStudents.json";
+    const dbUrl = "https://plus-c3d02-default-rtdb.firebaseio.com//approvedStudents.json";
     const res = await fetch(dbUrl);
     const data = await res.json();
     const exists = Object.values(data || {}).some(v => v.deviceId === uid);
