@@ -52,32 +52,35 @@ h1 {
 <select id="quality-select"></select>
 
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const title = urlParams.get("title") || "فيديو بدون اسم";
-const sources = JSON.parse(decodeURIComponent(urlParams.get("sources")));
+try {
+  const urlParams = new URLSearchParams(window.location.search);
+  const title = urlParams.get("title") || "فيديو بدون اسم";
+  const sources = JSON.parse(decodeURIComponent(urlParams.get("sources")));
 
-document.getElementById("video-title").innerText = title;
+  document.getElementById("video-title").innerText = title;
 
-const video = document.getElementById("video-player");
-const select = document.getElementById("quality-select");
+  const video = document.getElementById("video-player");
+  const select = document.getElementById("quality-select");
 
-// إنشاء قائمة الجودات
-sources.forEach((src) => {
-  const option = document.createElement("option");
-  option.value = src.url;
-  option.text = `${src.label}p`; // ✅ ← هنا كان الخطأ
-  select.appendChild(option);
-});
+  // إنشاء قائمة الجودات
+  sources.forEach((src) => {
+    const option = document.createElement("option");
+    option.value = src.url;
+    option.text = `${src.label}p`; // ✅ تم إصلاح الخطأ هنا
+    select.appendChild(option);
+  });
 
-console.log("Sources:", sources);
+  // تشغيل أعلى جودة افتراضيًا
+  video.src = select.value = sources[sources.length - 1].url;
 
-// تشغيل أعلى جودة افتراضيًا
-video.src = select.value = sources[sources.length - 1].url;
-
-select.onchange = () => {
-  video.src = select.value;
-  video.play();
-};
+  select.onchange = () => {
+    video.src = select.value;
+    video.play();
+  };
+} catch (err) {
+  console.error("❌ خطأ في تحميل الفيديو:", err);
+  alert("حدث خطأ أثناء تحميل الفيديو. تأكد من صحة البيانات في الرابط.");
+}
 </script>
 
 </body>
