@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>الأبواب - منصة THE BEST</title>
+<title>الدروس - منصة THE BEST</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
@@ -16,7 +16,6 @@
     transition: background 0.3s, color 0.3s;
   }
 
-  /* ===== الشريط العلوي ===== */
   .topbar {
     display: flex;
     align-items: center;
@@ -40,44 +39,6 @@
   .title {
     font-size: 14px;
     color: #f36;
-  }
-
-  .icons {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .icons img {
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-  }
-
-  .toggle-dark {
-    background: #fff;
-    border-radius: 12px;
-    width: 40px;
-    height: 20px;
-    position: relative;
-    cursor: pointer;
-  }
-
-  .toggle-dark::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
-    background: #111;
-    border-radius: 50%;
-    transition: 0.3s;
-  }
-
-  .toggle-dark.active::after {
-    left: 22px;
-    background: #ff0;
   }
 
   h1 {
@@ -110,58 +71,6 @@
     background:#333;
     transform: translateY(-3px);
   }
-
-  #toast {
-    visibility: hidden;
-    min-width: 260px;
-    background: #1e1e1e;
-    color: #ffd700;
-    text-align: center;
-    border-radius: 12px;
-    padding: 14px;
-    position: fixed;
-    z-index: 2000;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%);
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    opacity: 0;
-    transition: opacity 0.5s, bottom 0.5s;
-  }
-  #toast.show {
-    visibility: visible;
-    opacity: 1;
-    bottom: 50px;
-  }
-
-  body.light-mode {
-    background: #f5f5f5;
-    color: #000;
-  }
-  body.light-mode .topbar {
-    background: #fff;
-    color: #000;
-  }
-  body.light-mode li {
-    background: #fff;
-    color: #000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  }
-  body.light-mode #toast {
-    background: #fff;
-    color: #333;
-  }
-
-  #back {
-    color:#ffd700;
-    cursor:pointer;
-    text-align:center;
-    margin:15px auto;
-    display:block;
-    max-width:400px;
-    font-weight:bold;
-  }
 </style>
 </head>
 <body>
@@ -169,23 +78,12 @@
   <!-- ✅ الشريط العلوي -->
   <div class="topbar">
     <div class="menu-btn" id="backBtn">⬅</div>
-    <div class="title">𝑪𝒉𝒂𝒑𝒕𝒆𝒓𝒔 & 𝑪𝒂𝒎𝒑𝒔</div>
-    <div class="icons">
-      <div class="toggle-dark" id="darkToggle"></div>
-      <a href="" target="_blank">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
-      </a>
-      <img id="shareBtn" src="https://cdn-icons-png.flaticon.com/512/929/929610.png" alt="Share">
-      <img id="notifyBtn" src="https://cdn-icons-png.flaticon.com/512/1827/1827272.png" alt="Notification">
-    </div>
+    <div class="title">𝑳𝒆𝒄𝒕𝒖𝒓𝒆𝒔</div>
   </div>
 
-  <!-- ✅ Toast -->
-  <div id="toast">الإشعارات هتتفعل قريبًا 🔔✨</div>
-
-  <h1>𝑪𝒉𝒂𝒑𝒕𝒆𝒓𝒔 & 𝑪𝒂𝒎𝒑𝒔</h1>
-  <ul id="chapters-list">
-    <li>⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</li>
+  <h1>الدروس</h1>
+  <ul id="lectures-list">
+    <li>⏳ جاري التحميل...</li>
   </ul>
 
 <script type="module">
@@ -196,9 +94,9 @@ const teacher = urlParams.get("teacher");
 const chapter = urlParams.get("chapter");
 
 const lecturesList = document.getElementById("lectures-list");
-const backBtn = document.getElementById("back");
+const backBtn = document.getElementById("backBtn");
 
-// زر العودة
+// زر العودة للـ chapters
 backBtn.onclick = () => {
   window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
 };
@@ -257,6 +155,7 @@ async function loadLectures() {
       return;
     }
 
+    // إنشاء العناصر
     lectures.forEach(lecture => {
       const li = document.createElement("li");
       li.textContent = lecture;
