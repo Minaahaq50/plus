@@ -158,10 +158,14 @@ async function loadVideos() {
       const box = document.createElement("div");
       box.className = "video-box";
       box.innerHTML = `<div class="video-title">${video.name}</div>`;
-      box.onclick = () => {
-        const sources = encodeURIComponent(JSON.stringify(video.links));
-        window.location.href = `player.html?sources=${sources}&title=${encodeURIComponent(video.name)}`;
-      };
+    box.onclick = () => {
+  // نحفظ الجودات مؤقتًا في localStorage
+  localStorage.setItem("video_sources", JSON.stringify(video.links));
+  localStorage.setItem("video_title", video.name);
+  // نفتح صفحة التشغيل
+  window.location.href = "player.html";
+};
+
       videosContainer.appendChild(box);
     });
 
