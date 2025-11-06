@@ -266,7 +266,10 @@
           return;
         }
 
-        const thumb = teacherThumbs[teacher] || "https://img.icons8.com/fluency/300/youtube-play.png";
+       const thumb = teacherThumbs[
+  Object.keys(teacherThumbs).find(k => normalize(k) === normalize(teacher))
+] || "https://img.icons8.com/fluency/300/youtube-play.png";
+
 
         videos.forEach((video) => {
           const box = document.createElement("div");
