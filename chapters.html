@@ -188,99 +188,87 @@
     <li>⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</li>
   </ul>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+<script type="module">
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get("subject");
+const teacher = urlParams.get("teacher");
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
-      authDomain: "alamer-526ff.firebaseapp.com",
-      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
-      projectId: "alamer-526ff",
-      storageBucket: "alamer-526ff.firebasestorage.app",
-      messagingSenderId: "523879269039",
-      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
-    };
+const chaptersList = document.getElementById("chapters-list");
+const backBtn = document.getElementById("back");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+// دالة لتوحيد النص (تزيل الاختلافات)
+function normalize(str) {
+  return (str || "")
+    .trim()
+    .replace(/[.\s]/g, "")      // إزالة النقاط والمسافات
+    .replace(/[أإآا]/g, "ا")    // توحيد الألف
+    .toLowerCase();
+}
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const subject = urlParams.get('subject');
-    const teacher = urlParams.get('teacher');
+// زر العودة
+backBtn.onclick = () => {
+  window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
+};
 
-    const chaptersList = document.getElementById('chapters-list');
-    const backBtn = document.getElementById('backBtn');
+// تحميل الأبواب
+async function loadChapters() {
+  if (!subject || !teacher) {
+    chaptersList.innerHTML = '<li>⚠️ لم يتم تحديد المادة أو المدرس.</li>';
+    return;
+  }
 
-    backBtn.onclick = () => {
-      window.location.href = `teachers.html?subject=${encodeURIComponent(subject)}`;
-    };
+  try {
+    const res = await fetch("coursatk_scraped_data.json");
+    const json = await res.json();
+    const data = json.data || json;
 
-    if(!subject || !teacher){
-      chaptersList.innerHTML = '<li>لم يتم تحديد المادة أو المدرس.</li>';
-    } else {
-      onValue(ref(db, 'videos'), snapshot => {
-        const data = snapshot.val() || {};
-        const chapters = new Set();
-        Object.values(data).forEach(v => {
-          if(v.subject === subject && v.teacher === teacher && v.chapter){
-            chapters.add(v.chapter);
-          }
-        });
+    const wantedSubject = normalize(subject);
+    const wantedTeacher = normalize(teacher);
+    const foundChapters = [];
 
-        chaptersList.innerHTML = '';
-        if(chapters.size === 0){
-          chaptersList.innerHTML = '<li>لا يوجد أبواب لهذا المدرس.</li>';
-          return;
-        }
-
-        chapters.forEach(chapter => {
-          const li = document.createElement('li');
-          li.textContent = chapter;
-          li.onclick = () => {
-            window.location.href = `videos.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
-          };
-          chaptersList.appendChild(li);
-        });
-      });
-    }
-
-    // ✅ دالة Toast
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-    }
-
-    // ✅ زر الوضع الليلي والفاتح
-    const toggle = document.getElementById("darkToggle");
-    toggle.addEventListener("click", () => {
-      toggle.classList.toggle("active");
-      document.body.classList.toggle("light-mode");
-    });
-
-    // ✅ زر المشاركة
-    document.getElementById("shareBtn").addEventListener("click", async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "تطبيق دروسك أون لاين",
-            text: "جرب تطبيق دروسك أون لاين 2026 📚✨",
-            url: window.location.href
+    (data || []).forEach((year) => {
+      (year.subjects || []).forEach((sub) => {
+        if (normalize(sub.subject_name) === wantedSubject) {
+          (sub.teachers || []).forEach((t) => {
+            if (normalize(t.teacher_name) === wantedTeacher) {
+              console.log("✅ تم العثور على المدرس:", t.teacher_name);
+              (t.chapters || []).forEach((ch) => {
+                if (ch.chapter_name) foundChapters.push(ch.chapter_name);
+              });
+            }
           });
-        } catch (err) {
-          showToast("❌ تم إلغاء المشاركة");
         }
-      } else {
-        showToast("المشاركة غير مدعومة في متصفحك 😢");
-      }
+      });
     });
 
-    // ✅ زر الإشعارات → Toast
-    document.getElementById("notifyBtn").addEventListener("click", () => {
-      showToast("الإشعارات هتتفعل قريبًا 🔔✨");
+    chaptersList.innerHTML = "";
+
+    if (foundChapters.length === 0) {
+      console.warn("⚠️ لا يوجد أبواب لهذا المدرس:", teacher);
+      chaptersList.innerHTML = '<li>⚠️ لا يوجد أبواب لهذا المدرس.</li>';
+      return;
+    }
+
+    // عرض الأبواب
+    foundChapters.forEach((chapter) => {
+      const li = document.createElement("li");
+      li.textContent = chapter;
+      li.onclick = () => {
+        const url = `lecture_name.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
+        console.log("🔗 الانتقال إلى:", url);
+        window.location.href = url;
+      };
+      chaptersList.appendChild(li);
     });
-  </script>
+
+  } catch (err) {
+    console.error("❌ خطأ أثناء تحميل الملف:", err);
+    chaptersList.innerHTML = "<li>❌ حدث خطأ أثناء تحميل البيانات.</li>";
+  }
+}
+
+loadChapters();
+</script>
+
 </body>
 </html>
