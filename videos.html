@@ -1,89 +1,121 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>الفيديوهات - منصة THE BEST</title>
+  <meta name="description" content="THE BEST Platform - Browse educational videos by subject, teacher, and chapter." />
+  <title>Videos - THE BEST Platform</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <style>
     body {
-      font-family: 'Cairo', sans-serif;
-      background: #0d0d0d;
+      font-family: 'Poppins', sans-serif;
+      background: #0e0e0e;
       color: #fff;
-      padding: 20px;
       margin: 0;
+      padding: 30px;
+      line-height: 1.6;
     }
+
     h1 {
-      color: #ffd700;
+      color: #ffcc00;
       text-align: center;
-      margin: 0 0 25px;
+      font-size: 2rem;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
     }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      max-width: 1200px;
+      margin-inline: auto;
+    }
+
+    #back-arrow {
+      background: rgba(255, 204, 0, 0.1);
+      border: 2px solid #ffcc00;
+      color: #ffcc00;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+
+    #back-arrow:hover {
+      background: rgba(255, 204, 0, 0.25);
+      transform: translateY(-2px);
+    }
+
     #videos-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
-      max-width: 1200px;
+      max-width: 1100px;
       margin: auto;
     }
-    .video-box {
+
+    .video-card {
       background: #1a1a1a;
-      padding: 10px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+      padding: 18px;
       text-align: center;
-      transition: 0.3s;
+      border: 1px solid rgba(255, 204, 0, 0.15);
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
-    .video-box:hover {
+
+    .video-card:hover {
+      background: #222;
       transform: translateY(-5px);
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
     }
+
     .video-title {
-      color: #ffd700;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .thumb-wrapper {
-      position: relative;
-    }
-    .video-thumb {
-      width: 100%;
-      height: 200px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffcc00;
+      margin-bottom: 8px;
       transition: 0.3s;
-      border-radius: 10px;
     }
-    .thumb-wrapper:hover .overlay {
-      opacity: 1;
-    }
-    .overlay i {
-      font-size: 50px;
-      color: #ffd700;
-    }
+
     .video-meta {
-      font-size: 14px;
-      color: #bbb;
-      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #ffcc00;
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .video-title {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>🎥 الفيديوهات</h1>
+  <div class="header-container">
+    <button id="back-arrow" title="Back">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h1>🎥 Video Library</h1>
+    <div style="width:42px;"></div>
+  </div>
+
   <div id="videos-container">
-    <div style="text-align:center;color:#ffd700;">⏳ جاري تحميل الفيديوهات...</div>
+    <div class="loading">⏳ Loading videos...</div>
   </div>
 
   <script type="module">
@@ -92,24 +124,20 @@
     const teacher = urlParams.get("teacher");
     const chapter = urlParams.get("chapter");
     const lecture = urlParams.get("lecture");
-    const videosContainer = document.getElementById("videos-container");
 
-    // ✅ صور المدرسين
-    const teacherThumbs = {
-      "أ. رضا الفاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
-      "احمد الجوهري": "https://www2.0zz0.com/2025/09/30/16/552561462.jpeg",
-      "عبقري لغة": "https://ahmed-tarek.net/static/media/mr-tarek-hero-section.f2bf4f0e2cf0c8b0d728.png",
-      "م.شريف المصري": "https://www2.0zz0.com/2025/11/06/07/363623552.jpg",
-      "أ.محمد عبد المعبود": "https://abdelmaaboud.com/frontend/landing/images/6T9A1528-1.png",
-      "د.عبدالله حبشي": "https://www2.0zz0.com/2025/11/05/22/229876543.jpg"
+    const videosContainer = document.getElementById("videos-container");
+    const backBtn = document.getElementById("back-arrow");
+
+    backBtn.onclick = () => {
+      if (lecture) {
+        window.location.href = `lectures.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
+      } else {
+        window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
+      }
     };
 
-    // 🔄 توحيد النصوص
     function normalize(str) {
-      return (str || "")
-        .trim()
-        .replace(/[\s.\-ـ_]/g, "")
-        .toLowerCase();
+      return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
     }
 
     async function loadVideos() {
@@ -122,7 +150,6 @@
         const wantedTeacher = normalize(teacher);
         const wantedChapter = normalize(chapter);
         const wantedLecture = normalize(lecture);
-
         const videos = [];
 
         (data || []).forEach((year) => {
@@ -135,14 +162,11 @@
                       (chap.lectures || []).forEach((lec) => {
                         if (!lecture || normalize(lec.lecture_name).includes(wantedLecture)) {
                           (lec.videos || []).forEach((vid) => {
-                            if (vid.links && vid.links.length > 0) {
-                              const qualities = vid.links.map(q => ({
-                                label: q.label,
-                                url: q.url
-                              }));
+                            const link = vid.links?.[vid.links.length - 1]?.url;
+                            if (link) {
                               videos.push({
                                 name: vid.video_name,
-                                qualities
+                                link
                               });
                             }
                           });
@@ -159,39 +183,31 @@
         videosContainer.innerHTML = "";
 
         if (videos.length === 0) {
-          videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>⚠️ لا توجد فيديوهات في هذه المحاضرة.</div>";
+          videosContainer.innerHTML = "<div class='loading'>⚠️ No videos found for this lecture.</div>";
           return;
         }
 
-        // 🔍 نجيب صورة المدرس حتى لو الاسم مختلف
-        const foundTeacher = Object.keys(teacherThumbs).find(k => normalize(k) === normalize(teacher));
-        const thumb = foundTeacher ? teacherThumbs[foundTeacher] : "https://img.icons8.com/fluency/300/youtube-play.png";
-
         videos.forEach((video) => {
-          const box = document.createElement("div");
-          box.className = "video-box";
-          box.innerHTML = `
+          const card = document.createElement("div");
+          card.className = "video-card";
+          card.innerHTML = `
             <div class="video-title">${video.name}</div>
-            <div class="thumb-wrapper">
-              <img class="video-thumb" src="${thumb}" alt="video">
-              <div class="overlay"><i class="fas fa-play-circle"></i></div>
-            </div>
-            <div class="video-meta">${teacher} • ${chapter}</div>
+            <div class="video-meta">${teacher || "Unknown Teacher"} • ${chapter || ""}</div>
           `;
-          box.onclick = () => {
-            const sources = encodeURIComponent(JSON.stringify(video.qualities));
-            window.location.href = \`player.html?sources=\${sources}&title=\${encodeURIComponent(video.name)}\`;
+          card.onclick = () => {
+            window.location.href = `player.html?url=${encodeURIComponent(video.link)}&title=${encodeURIComponent(video.name)}`;
           };
-          videosContainer.appendChild(box);
+          videosContainer.appendChild(card);
         });
 
       } catch (err) {
-        console.error(err);
-        videosContainer.innerHTML = "<div style='text-align:center; color:#ffd700;'>❌ خطأ أثناء تحميل البيانات.</div>";
+        console.error("❌ Error loading data:", err);
+        videosContainer.innerHTML = "<div class='loading'>❌ Error loading videos.</div>";
       }
     }
 
     loadVideos();
   </script>
+
 </body>
 </html>
