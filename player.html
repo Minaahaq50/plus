@@ -65,16 +65,20 @@ try {
   const video = document.getElementById("video-player");
   const select = document.getElementById("quality-select");
 
+  // 🔗 لينك البروكسي بتاعك على Vercel
+  const proxyBase = "https://plus-znb1-okplz599o-minaahaq50s-projects.vercel.app/api/proxy?url=";
+
   // إنشاء قائمة الجودات
   sources.forEach((src) => {
     const option = document.createElement("option");
-    option.value = src.url;
+    // ✅ نمرر كل لينك من خلال البروكسي
+    option.value = proxyBase + encodeURIComponent(src.url);
     option.text = `${src.label}p`;
     select.appendChild(option);
   });
 
   // تشغيل أعلى جودة افتراضيًا
-  let currentUrl = sources[sources.length - 1].url;
+  let currentUrl = select.options[select.options.length - 1].value;
   playVideo(currentUrl);
 
   select.onchange = () => {
