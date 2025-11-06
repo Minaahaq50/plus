@@ -226,153 +226,116 @@
     <li>⏳....𝑳𝒐𝒂𝒅𝒊𝒏𝒈</li>
   </ul>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+ <script type="module">
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get('subject');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCdhj73cKJc2J2_tDHw2-89EemZx-EGMJQ",
-      authDomain: "alamer-526ff.firebaseapp.com",
-      databaseURL: "https://alamer-526ff-default-rtdb.firebaseio.com",
-      projectId: "alamer-526ff",
-      storageBucket: "alamer-526ff.firebasestorage.app",
-      messagingSenderId: "523879269039",
-      appId: "1:523879269039:web:634861aa34641bfebf8a5a",
-    };
+const teachersList = document.getElementById('teachers-list');
+const backBtn = document.getElementById('back');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+backBtn.onclick = () => {
+  window.location.href = 'subjects.html';
+};
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const subject = urlParams.get('subject');
+// 🧩 صور المواد
+const subjectImages = {
+  "أحياء": "https://www2.0zz0.com/2025/09/30/15/923573836.png",
+  "فيزياء": "https://www2.0zz0.com/2025/09/30/15/161746092.jpeg",
+  "كيمياء": "https://www2.0zz0.com/2025/09/30/15/432614713.png",
+  "لغة عربية": "https://www2.0zz0.com/2025/09/30/15/663687320.png",
+  "إنجليزي": "https://www2.0zz0.com/2025/09/30/15/572118063.jpeg", 
+  "ادبي": "https://www2.0zz0.com/2025/09/30/16/456237523.jpeg",
+};
 
-    const teachersList = document.getElementById('teachers-list');
+// 🧑‍🏫 صور المدرسين الثابتة
+const teacherImages = {
+  "أ. رضا الفاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
+  "احمد الجوهري": "https://www2.0zz0.com/2025/09/30/16/552561462.jpeg",
+  "امنيه السيد": "https://www2.0zz0.com/2025/09/30/16/890513320.jpeg",
+  "الجيو": "https://www2.0zz0.com/2025/09/30/16/909707656.jpeg",
+  "احمد ايمن": "https://www2.0zz0.com/2025/09/30/16/773990567.jpeg",
+  "مس مي": "https://www2.0zz0.com/2025/09/30/16/649744644.jpeg",
+  "وائل ميلاد": "https://www2.0zz0.com/2025/09/30/16/168143044.jpeg",
+  "محمد صلاح": "https://www2.0zz0.com/2025/09/30/16/338801240.jpeg",
+  "كيرلس القص": "https://www2.0zz0.com/2025/09/30/16/232647610.png",
+  "عبد المعبود": "https://www2.0zz0.com/2025/09/30/16/576331510.jpeg",
+  "خالد صقر": "https://www2.0zz0.com/2025/09/30/16/161825392.jpeg",
+  "عبد الجواد": "https://www2.0zz0.com/2025/09/30/16/754219913.jpeg",
+  "جون جهبذ": "https://www2.0zz0.com/2025/09/30/16/456815270.jpeg"
+};
 
-    // صور المواد
-    const subjectImages = {
-      "أحياء": "https://www2.0zz0.com/2025/11/02/15/649993343.jpg",
-      "فيزياء": "https://www2.0zz0.com/2025/11/02/15/952831001.jpg",
-      "كيمياء": "https://www2.0zz0.com/2025/11/02/15/800039597.jpg",
-      "عربي": "https://www2.0zz0.com/2025/11/02/15/757447165.jpg",
-      "إنجليزي": "https://www2.0zz0.com/2025/11/02/15/317949064.jpg", 
-      "ادبي": "https://www2.0zz0.com/2025/09/30/16/456237523.jpeg",
-      "جيولوجيا": "https://www2.0zz0.com/2025/11/02/15/649993343.jpg",
-      "رياضه": "https://www2.0zz0.com/2025/11/02/15/680442977.jpg",  
-      "ادبي": "https://www2.0zz0.com/2025/10/01/19/580067879.jpeg", 
-    };
+// ✅ تحميل البيانات من coursatk_scraped_data.json
+async function loadTeachers() {
+  if (!subject) {
+    teachersList.innerHTML = '<li>⚠️ لم يتم تحديد المادة.</li>';
+    return;
+  }
 
-    // صور المدرسين
-    const teacherImages = {
-      "احمد الجوهري": "https://www2.0zz0.com/2025/09/30/16/552561462.jpeg",
-      "امنيه السيد": "https://www2.0zz0.com/2025/09/30/16/890513320.jpeg",
-      "الجيو": "https://www2.0zz0.com/2025/09/30/16/909707656.jpeg",
-      "احمد ايمن": "https://www2.0zz0.com/2025/09/30/16/773990567.jpeg",
-      "مس مي": "https://www.more-english.net/_next/image?url=%2Fassets%2Fhero3.png&w=640&q=75",
-      "وائل ميلاد": "https://www2.0zz0.com/2025/09/30/16/168143044.jpeg",
-      "رضا فاروق": "https://www2.0zz0.com/2025/09/30/16/498034522.jpeg",
-      "محمد صلاح": "https://www2.0zz0.com/2025/09/30/16/338801240.jpeg",
-      "كيرلس القص": "https://www2.0zz0.com/2025/09/30/16/232647610.png",
-      "عبد المعبود": "https://www2.0zz0.com/2025/09/30/16/576331510.jpeg",
-      "خالد صقر": "https://www2.0zz0.com/2025/09/30/16/161825392.jpeg",
-      "عبد الجواد": "https://backend.eduvalu.com/uploads/teachers/TEACHER-3757193/c78ffbf64a791da67752132a9aaf7c8f127fc4f4.jpeg",
-      "المؤرخ": "https://www2.0zz0.com/2025/10/01/13/327516502.jpeg", 
-      "القيصر": "https://www2.0zz0.com/2025/10/01/13/914455027.png", 
-      "انجلشاوي": "https://www.mrenglishawy.com/_next/image?url=%2FthemeContent%2Fbranding%2Fimages%2Fhome%2Fsplashs1.png&w=640&q=75",
-      "عمرو الصيفي": "https://www2.0zz0.com/2025/10/26/19/557169426.jpeg",
-      "سامح احمد": "https://www2.0zz0.com/2025/10/27/08/921472011.jpeg",
-      "حسام خليل": "https://www2.0zz0.com/2025/10/30/08/502426534.png",
-      "احمد عصام": "https://www2.0zz0.com/2025/10/05/19/426937074.jpeg",  
-      "جون جهبذ": "https://www2.0zz0.com/2025/11/02/09/769615032.jpg"
-    };
+  try {
+    const res = await fetch('coursatk_scraped_data.json');
+    const json = await res.json();
+    const data = json.data || json;
 
-    if(!subject){
-      teachersList.innerHTML = '<li>لم يتم تحديد المادة.</li>';
-    } else {
-      onValue(ref(db, 'videos'), snapshot => {
-        const data = snapshot.val() || {};
-        const teachers = new Map();
+    const teachers = new Set();
 
-        Object.values(data).forEach(v => {
-          if (v.subject === subject && v.teacher) {
-            const cleanTeacher = v.teacher.trim().replace(/\s+/g, ' ');
-            teachers.set(cleanTeacher, teacherImages[cleanTeacher] || null);
-          }
-        });
-
-        teachersList.innerHTML = '';
-        if(teachers.size === 0){
-          teachersList.innerHTML = '<li>لا يوجد مدرسون لهذه المادة.</li>';
-          return;
-        }
-
-        teachers.forEach((imgUrl, teacher) => {
-          const li = document.createElement('li');
-
-          const subjectImg = document.createElement('img');
-          subjectImg.className = 'subject-img';
-          subjectImg.src = subjectImages[subject] || "https://img.icons8.com/fluency/300/book.png";
-          subjectImg.alt = subject;
-
-          const circle = document.createElement('div');
-          circle.className = 'teacher-circle';
-
-          const teacherImg = document.createElement('img');
-          teacherImg.src = imgUrl || "https://img.icons8.com/ios-filled/100/ffd700/user-male-circle.png";
-          teacherImg.alt = teacher;
-          circle.appendChild(teacherImg);
-
-          const span = document.createElement('span');
-          span.textContent = teacher;
-
-          li.appendChild(subjectImg);
-          li.appendChild(circle);
-          li.appendChild(span);
-
-          li.onclick = () => {
-            window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
-          };
-
-          teachersList.appendChild(li);
-        });
-      });
-    }
-
-    // ✅ دالة Toast
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-    }
-
-    // ✅ زر الوضع الليلي والفاتح
-    const toggle = document.getElementById("darkToggle");
-    toggle.addEventListener("click", () => {
-      toggle.classList.toggle("active");
-      document.body.classList.toggle("light-mode");
-    });
-
-    // ✅ زر المشاركة
-    document.getElementById("shareBtn").addEventListener("click", async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "تطبيق دروسك أون لاين",
-            text: "جرب تطبيق دروسك أون لاين 2026 📚✨",
-            url: window.location.href
+    (data || []).forEach(year => {
+      (year.subjects || []).forEach(sub => {
+        if (sub.subject_name === subject) {
+          (sub.teachers || []).forEach(t => {
+            teachers.add(t.teacher_name);
           });
-        } catch (err) {
-          showToast("❌ تم إلغاء المشاركة");
         }
-      } else {
-        showToast("المشاركة غير مدعومة في متصفحك 😢");
-      }
+      });
     });
 
-    // ✅ زر الإشعارات → Toast
-    document.getElementById("notifyBtn").addEventListener("click", () => {
-      showToast("الإشعارات هتتفعل قريبًا 🔔✨");
+    teachersList.innerHTML = '';
+
+    if (teachers.size === 0) {
+      teachersList.innerHTML = '<li>لا يوجد مدرسون لهذه المادة.</li>';
+      return;
+    }
+
+    // إنشاء العناصر
+    teachers.forEach(teacherName => {
+      const li = document.createElement('li');
+
+      const subjectImg = document.createElement('img');
+      subjectImg.className = 'subject-img';
+      subjectImg.src = subjectImages[subject] || "https://img.icons8.com/fluency/300/book.png";
+      subjectImg.alt = subject;
+
+      const circle = document.createElement('div');
+      circle.className = 'teacher-circle';
+
+      const teacherImg = document.createElement('img');
+      teacherImg.src = teacherImages[teacherName] || "https://img.icons8.com/ios-filled/100/ffd700/user-male-circle.png";
+      teacherImg.alt = teacherName;
+      circle.appendChild(teacherImg);
+
+      const span = document.createElement('span');
+      span.textContent = teacherName;
+
+      li.appendChild(subjectImg);
+      li.appendChild(circle);
+      li.appendChild(span);
+
+      // ✅ هنا التعديل المهم
+      li.onclick = () => {
+        const link = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacherName)}`;
+        console.log("🔗 الانتقال إلى:", link);
+        window.location.href = link;
+      };
+
+      teachersList.appendChild(li);
     });
-  </script>
+
+  } catch (err) {
+    console.error(err);
+    teachersList.innerHTML = '<li>❌ حدث خطأ أثناء تحميل البيانات.</li>';
+  }
+}
+
+loadTeachers();
+</script>
 </body>
 </html>
