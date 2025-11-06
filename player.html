@@ -168,33 +168,30 @@
 
   <div id="toast">🚧 سيتم إضافة هذه الميزة قريبًا 🔜</div>
 
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
-  // 🔹 قراءة البيانات من localStorage
-  let qualitySources = [];
-  let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
-  const savedSources = localStorage.getItem("video_sources");
+let qualitySources = [];
+let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
+const savedSources = localStorage.getItem("video_sources");
 
 if (savedSources) {
   try {
     const links = JSON.parse(savedSources);
-
     if (Array.isArray(links)) {
-      // ✅ التعامل مع اللينكات اللي فيها label و url
       qualitySources = links.map(link => ({
-        src: link.url || link, // لو الكائن فيه url نستخدمه، لو نص نستخدمه مباشرة
-        type: "application/x-mpegURL", // صيغة HLS (m3u8)
-        size: parseInt(link.label) || 720 // الجودة
+        src: link.url || link,
+        type: "application/x-mpegURL",
+        label: parseInt(link.label) || 720
       }));
     } else {
       qualitySources = [{
         src: links.url || links,
         type: "application/x-mpegURL",
-        size: parseInt(links.label) || 720
+        label: parseInt(links.label) || 720
       }];
     }
-
   } catch (err) {
     console.error("❌ Error parsing savedSources:", err);
   }
@@ -202,53 +199,71 @@ if (savedSources) {
   document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
 }
 
+const video = document.getElementById('player');
+const player = new Plyr(video, {
+  controls: [
+    'play-large','play','progress','current-time',
+    'mute','volume','settings','fullscreen'
+  ],
+  settings: ['quality','speed','loop'],
+  i18n: { qualityLabel: { 1080:'1080p',720:'720p',480:'480p',360:'360p',240:'240p' } }
+});
 
-  // 🔹 إنشاء مشغل الفيديو Plyr
-  const player = new Plyr('#player', {
-    controls: [
-      'play-large','play','progress','current-time',
-      'mute','volume','settings','fullscreen'
-    ],
-    settings: ['quality','speed','loop']
-  });
-
- // 🔹 تشغيل الفيديو سواء كان HLS أو MP4
+// 🔹 تشغيل الفيديو مع اختيار جودة 720
 if (qualitySources.length > 0) {
-  const firstSrc = qualitySources[0].src;
+  // ترتيب الجودات من الأعلى إلى الأقل
+  const sorted = qualitySources.sort((a,b) => b.label - a.label);
 
-  if (firstSrc.endsWith(".m3u8") && Hls.isSupported()) {
+  // اختيار الجودة 720 إن وجدت أو أقرب جودة
+  const defaultQuality = sorted.find(q => q.label === 720)?.label || sorted[Math.floor(sorted.length / 2)].label;
+  const defaultSource = sorted.find(q => q.label === defaultQuality) || sorted[0];
+
+  if (Hls.isSupported()) {
     const hls = new Hls();
-    hls.loadSource(firstSrc);
-    hls.attachMedia(document.getElementById('player'));
+    hls.loadSource(defaultSource.src);
+    hls.attachMedia(video);
 
-    // تحديث الجودة من اللينكات
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-      console.log("✅ HLS manifest loaded");
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      const availableQualities = sorted.map(q => q.label);
+      player.options.quality = {
+        default: defaultQuality,
+        options: availableQualities,
+        forced: true,
+        onChange: (newQuality) => {
+          const selected = sorted.find(q => q.label == newQuality);
+          if (selected) {
+            hls.loadSource(selected.src);
+            hls.attachMedia(video);
+            player.play();
+          }
+        }
+      };
+      console.log(`🎬 تم تشغيل الفيديو بجودة ${defaultQuality}p`);
     });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = defaultSource.src;
   } else {
-    player.source = {
-      type: 'video',
-      title: videoTitle,
-      sources: qualitySources
-    };
+    document.body.innerHTML = "<div class='error-msg'>💔 المتصفح لا يدعم الفيديو HLS.</div>";
   }
+} else {
+  document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد روابط الفيديو 😢</div>";
 }
 
+// 🔹 Toast إشعارات التطبيقات
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
 
-  // 🔹 Toast إشعارات التطبيقات
-  function showToast(msg) {
-    const toast = document.getElementById("toast");
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2500);
-  }
-
-  document.querySelectorAll(".app-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
-    });
+document.querySelectorAll(".app-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
   });
+});
 </script>
+
 
 </body>
 </html>
