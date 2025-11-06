@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تشغيل الفيديو - منصة THE BEST</title>
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
       font-family: 'Cairo', sans-serif;
@@ -69,42 +70,44 @@
       console.error('خطأ في قراءة الجودات:', err);
     }
 
+    const video = document.getElementById('player');
+
     if (sources.length === 0) {
       document.body.innerHTML = "<p style='color:#ffd700; margin-top:50px;'>⚠️ لا توجد روابط فيديو صالحة.</p>";
     } else {
-      const player = new Plyr('#player', {
+      const defaultSource = sources[sources.length - 1].url; // أعلى جودة افتراضيًا
+      const player = new Plyr(video, {
         controls: [
           'play-large','play','progress','current-time',
           'mute','volume','settings','pip','airplay','fullscreen'
         ],
-        settings: ['quality', 'speed', 'loop'],
-        quality: {
-          default: sources[sources.length - 1].label,
-          options: sources.map(s => s.label),
-          forced: true,
-          onChange: (q) => {
-            const selected = sources.find(s => s.label === q);
-            if (selected) {
-              player.source = {
-                type: 'video',
-                sources: [{ src: selected.url, type: 'application/x-mpegURL', size: q }]
-              };
-              player.play();
-            }
-          }
-        }
+        settings: ['speed', 'loop'],
       });
 
-      // إعداد أول فيديو
-      player.source = {
-        type: 'video',
-        title,
-        sources: sources.map(s => ({
-          src: s.url,
-          type: 'application/x-mpegURL',
-          size: s.label
-        }))
-      };
+      // ✅ تشغيل m3u8 باستخدام Hls.js
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(defaultSource);
+        hls.attachMedia(video);
+
+        // لو في مشكلة في رابط
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error("❌ HLS error:", data);
+        });
+
+        // عند توفر الجودات
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          player.play();
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // دعم مباشر في Safari
+        video.src = defaultSource;
+        video.addEventListener('loadedmetadata', () => {
+          video.play();
+        });
+      } else {
+        video.src = defaultSource;
+      }
     }
   </script>
 </body>
