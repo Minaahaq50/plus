@@ -167,100 +167,101 @@
   </div>
 
   <div id="toast">🚧 سيتم إضافة هذه الميزة قريبًا 🔜</div>
-
- <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
-  // 🔹 قراءة البيانات من localStorage
-  let qualitySources = [];
-  let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
-  const savedSources = localStorage.getItem("video_sources");
+let qualitySources = [];
+let videoTitle = localStorage.getItem("video_title") || "Lecture Video";
+const savedSources = localStorage.getItem("video_sources");
 
-  if (savedSources) {
-    try {
-      const links = JSON.parse(savedSources);
-      if (Array.isArray(links)) {
-        qualitySources = links.map(link => ({
-          label: link.label,
-          src: link.url || link,
-          type: "application/x-mpegURL"
-        }));
-      } else {
-        qualitySources = [{
-          label: links.label,
-          src: links.url || links,
-          type: "application/x-mpegURL"
-        }];
-      }
-    } catch (err) {
-      console.error("❌ Error parsing savedSources:", err);
+if (savedSources) {
+  try {
+    const links = JSON.parse(savedSources);
+    if (Array.isArray(links)) {
+      qualitySources = links.map(link => ({
+        label: parseInt(link.label),
+        src: link.url,
+        type: "application/x-mpegURL"
+      }));
+    } else {
+      qualitySources = [{
+        label: parseInt(links.label),
+        src: links.url,
+        type: "application/x-mpegURL"
+      }];
     }
-  } else {
-    document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
+  } catch (err) {
+    console.error("❌ Error parsing savedSources:", err);
   }
+} else {
+  document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد رابط الفيديو 😢</div>";
+}
 
-  const video = document.getElementById('player');
+const video = document.getElementById('player');
 
-  // 🔹 إنشاء المشغل
-  const player = new Plyr(video, {
-    controls: ['play-large','play','progress','current-time','mute','volume','settings','fullscreen'],
-    settings: ['quality','speed','loop'],
-    i18n: {
-      qualityLabel: {
-        720: '720p', 480: '480p', 360: '360p', 240: '240p', 144: '144p'
-      }
-    }
-  });
+// 🔹 إنشاء المشغل
+const player = new Plyr(video, {
+  controls: [
+    'play-large','play','progress','current-time',
+    'mute','volume','settings','fullscreen'
+  ],
+  settings: ['quality','speed','loop'],
+  i18n: { qualityLabel: { 720:'720p',480:'480p',360:'360p',240:'240p',144:'144p' } }
+});
 
-  // 🔹 تشغيل الفيديو بالجودات
-  if (qualitySources.length > 0) {
-    const defaultQuality = Math.max(...qualitySources.map(q => q.label));
-    let hls = new Hls();
+if (qualitySources.length > 0) {
+  // ترتيب الجودات تنازليًا
+  const sorted = qualitySources.sort((a,b) => b.label - a.label);
+  const defaultQuality = sorted[0].label;
+  const videoEl = document.getElementById('player');
 
-    const loadQuality = (label) => {
-      const selected = qualitySources.find(q => q.label == label);
-      if (!selected) return;
-      if (hls) hls.destroy();
-      hls = new Hls();
-      hls.loadSource(selected.src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        player.play();
-      });
-    };
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(sorted[0].src);
+    hls.attachMedia(videoEl);
 
-    if (Hls.isSupported()) {
-      loadQuality(defaultQuality);
-
-      const qualities = qualitySources.map(q => q.label).sort((a,b)=>b-a);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      const availableQualities = sorted.map(q => q.label);
       player.options.quality = {
         default: defaultQuality,
-        options: qualities,
+        options: availableQualities,
         forced: true,
         onChange: (newQuality) => {
-          loadQuality(newQuality);
+          const selected = sorted.find(q => q.label == newQuality);
+          if (selected) {
+            hls.loadSource(selected.src);
+            hls.attachMedia(videoEl);
+            player.play();
+          }
         }
       };
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = qualitySources.find(q => q.label === defaultQuality)?.src || qualitySources[0].src;
-    } else {
-      document.body.innerHTML = "<div class='error-msg'>المتصفح لا يدعم الفيديو 😢</div>";
-    }
-  }
-
-  // 🔹 Toast
-  function showToast(msg) {
-    const toast = document.getElementById("toast");
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2500);
-  }
-
-  document.querySelectorAll(".app-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
     });
+
+  } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+    videoEl.src = sorted[0].src;
+  } else {
+    document.body.innerHTML = "<div class='error-msg'>💔 المتصفح لا يدعم الفيديو HLS.</div>";
+  }
+
+} else {
+  document.body.innerHTML = "<div class='error-msg'>لم يتم تحديد روابط الفيديو 😢</div>";
+}
+
+// 🔹 Toast
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+document.querySelectorAll(".app-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    showToast("🚧 سيتم إضافة هذه الميزة قريبًا 🔜");
   });
+});
 </script>
+
 </body>
 </html>
