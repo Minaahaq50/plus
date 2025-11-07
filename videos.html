@@ -11,44 +11,47 @@
       background: #0d0d0d;
       color: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     header h1 {
       color: #ffd700;
-      font-size: 2rem;
+      font-size: 1.6rem;
       margin: 0;
       font-weight: 900;
+      text-align: center;
+      flex-grow: 1;
     }
 
     #back {
       background: rgba(255, 215, 0, 0.1);
-      border: 2px solid #ffd700;
+      border: 1.5px solid #ffd700;
       color: #ffd700;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 6px 10px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       transition: 0.3s;
+      margin-left: 5px;
     }
 
     #back:hover {
       background: rgba(255, 215, 0, 0.2);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     #videos-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      max-width: 1100px;
       margin: auto;
     }
 
@@ -56,29 +59,29 @@
       background: #1a1a1a;
       border: 1px solid rgba(255, 215, 0, 0.15);
       border-radius: 12px;
-      padding: 15px;
+      padding: 12px;
       transition: 0.3s;
       overflow: hidden;
       box-shadow: 0 0 10px rgba(255,215,0,0.05);
     }
 
     .video-box:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px rgba(255,215,0,0.25);
+      transform: translateY(-4px);
+      box-shadow: 0 0 18px rgba(255,215,0,0.25);
     }
 
     .video-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #ffd700;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .thumb {
       background: #000;
       border-radius: 10px;
-      height: 180px;
+      height: 160px;
       position: relative;
       display: flex;
       justify-content: center;
@@ -87,16 +90,10 @@
       cursor: pointer;
     }
 
-    .thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
     .thumb::after {
       content: "▶";
       position: absolute;
-      font-size: 45px;
+      font-size: 40px;
       color: #ffd700;
       text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
       transition: transform 0.3s ease;
@@ -109,21 +106,44 @@
     .loading, .error {
       text-align: center;
       color: #ffd700;
-      font-size: 18px;
+      font-size: 17px;
       padding: 20px;
     }
 
     footer {
       text-align: center;
       color: #888;
-      margin-top: 40px;
-      font-size: 0.9rem;
+      margin-top: 35px;
+      font-size: 0.85rem;
       border-top: 1px solid rgba(255, 215, 0, 0.1);
-      padding-top: 20px;
+      padding-top: 15px;
     }
 
     footer span {
       color: #ffd700;
+    }
+
+    /* ⚡ تحسين عرض الموبايل */
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.3rem;
+      }
+      .video-title {
+        font-size: 15px;
+      }
+      .thumb {
+        height: 140px;
+      }
+      body {
+        padding: 10px;
+      }
+      #videos-container {
+        gap: 12px;
+      }
+      #back {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -132,7 +152,7 @@
   <header>
     <button id="back">⬅ رجوع</button>
     <h1>🎬 الفيديوهات</h1>
-    <div style="width:40px;"></div>
+    <div style="width:35px;"></div>
   </header>
 
   <main>
@@ -166,6 +186,7 @@
     async function loadVideos() {
       try {
         const res = await fetch("coursatk_scraped_data.json");
+        if (!res.ok) throw new Error("فشل تحميل البيانات");
         const json = await res.json();
         const data = json.data || json;
 
