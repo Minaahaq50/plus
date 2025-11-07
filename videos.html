@@ -1,94 +1,105 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🎬 الفيديوهات - منصة THE BEST</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎬 منصة THE BEST - الفيديوهات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&display=swap" rel="stylesheet">
 
 <style>
   :root {
     --gold: #ffd700;
-    --gold-light: #ffea8a;
-    --bg-dark: #0a0a0a;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --border-gold: rgba(255, 215, 0, 0.25);
-    --shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+    --gold-light: #fff3b0;
+    --bg-dark: #06060a;
+    --glass: rgba(255,255,255,0.06);
+    --accent: #ffb400;
   }
 
   body {
     font-family: 'Cairo', sans-serif;
-    background: radial-gradient(circle at top, #000, #0a0a0a);
+    background: radial-gradient(circle at 20% 20%, #0b0b17, #000);
     color: #fff;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
     overflow-x: hidden;
+    min-height: 100vh;
   }
 
   header {
+    background: rgba(15,15,15,0.8);
+    backdrop-filter: blur(12px);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 25px;
-    background: rgba(15, 15, 15, 0.9);
-    border-bottom: 1px solid var(--border-gold);
+    padding: 18px 25px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.25);
     position: sticky;
     top: 0;
-    z-index: 100;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+    z-index: 10;
   }
 
   header h1 {
-    color: var(--gold);
-    font-size: 2rem;
+    font-size: 1.9rem;
     font-weight: 900;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(255,215,0,0.4);
   }
 
   #back {
-    background: linear-gradient(135deg, #ffd700, #ffb400);
-    color: #000;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
     border: none;
     border-radius: 50px;
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 1rem;
+    padding: 10px 22px;
+    font-weight: bold;
+    color: #000;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
   }
 
   #back:hover {
+    transform: scale(1.08);
     background: var(--gold-light);
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255,215,0,0.5);
   }
 
   main {
-    padding: 50px 20px 80px;
+    padding: 60px 20px 100px;
     max-width: 1300px;
     margin: auto;
   }
 
   #videos-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 35px;
   }
 
   .video-box {
-    background: var(--glass-bg);
-    border: 1px solid var(--border-gold);
-    border-radius: 20px;
+    position: relative;
+    background: var(--glass);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 18px;
     padding: 30px 25px;
     text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 10px rgba(255,215,0,0.1);
-    transition: all 0.4s ease;
-    position: relative;
     overflow: hidden;
+    box-shadow: 0 0 15px rgba(255,215,0,0.05);
+  }
+
+  .video-box::before {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,215,0,0.15), transparent);
+    transition: top 0.6s ease;
+  }
+
+  .video-box:hover::before {
+    top: 100%;
   }
 
   .video-box:hover {
@@ -97,47 +108,39 @@
   }
 
   .video-title {
+    font-size: 1.3rem;
     color: var(--gold);
-    font-size: 22px;
     font-weight: 800;
-    margin-bottom: 20px;
-    line-height: 1.6;
-    text-shadow: 0 0 10px rgba(255,215,0,0.3);
-    animation: glow 3s infinite ease-in-out;
-  }
-
-  @keyframes glow {
-    0% { text-shadow: 0 0 10px rgba(255,215,0,0.3); }
-    50% { text-shadow: 0 0 20px rgba(255,215,0,0.7); }
-    100% { text-shadow: 0 0 10px rgba(255,215,0,0.3); }
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.4);
   }
 
   .watch-btn {
-    background: linear-gradient(135deg, var(--gold), #ffb400);
-    color: #000;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
     border: none;
     border-radius: 30px;
-    padding: 12px 25px;
+    padding: 12px 28px;
+    color: #000;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: 0.3s;
     font-size: 1rem;
-    box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    box-shadow: 0 0 20px rgba(255,215,0,0.25);
   }
 
   .watch-btn:hover {
     background: var(--gold-light);
     transform: scale(1.07);
-    box-shadow: 0 0 25px rgba(255,215,0,0.5);
+    box-shadow: 0 0 35px rgba(255,215,0,0.5);
   }
 
   footer {
     text-align: center;
-    color: #999;
+    padding: 30px 10px;
     font-size: 0.95rem;
-    padding: 25px 10px 20px;
-    border-top: 1px solid rgba(255, 215, 0, 0.1);
+    color: #999;
     background: #0a0a0a;
+    border-top: 1px solid rgba(255,215,0,0.15);
   }
 
   footer span {
@@ -146,31 +149,26 @@
   }
 
   @media (max-width: 600px) {
-    header h1 {
-      font-size: 1.5rem;
-    }
-    .video-title {
-      font-size: 18px;
-    }
+    header h1 { font-size: 1.5rem; }
+    .video-title { font-size: 1.1rem; }
   }
 </style>
 </head>
 
 <body>
-
   <header>
     <h1>🎬 الفيديوهات</h1>
-    <button id="back">⬅ الرجوع</button>
+    <button id="back">⬅ رجوع</button>
   </header>
 
   <main>
     <div id="videos-container">
-      <div style="text-align:center; color:#ffd700;">⏳ جاري تحميل الفيديوهات...</div>
+      <div style="text-align:center;color:#ffd700;">⏳ جاري تحميل الفيديوهات...</div>
     </div>
   </main>
 
   <footer>
-    © جميع الحقوق محفوظة لمنصة <span>THE BEST</span> 🔥
+    © جميع الحقوق محفوظة لمنصة <span>THE BEST</span> 2026 ✨
   </footer>
 
 <script>
@@ -243,20 +241,19 @@ async function loadVideos() {
       box.className = "video-box";
       box.innerHTML = `
         <div class="video-title">${video.name}</div>
-        <button class="watch-btn">🎥 اضغط للمشاهدة</button>
+        <button class="watch-btn">🎥 مشاهدة</button>
       `;
 
       box.querySelector(".watch-btn").onclick = () => {
         let selected = video.links.find(link => parseInt(link.label) === 720);
         if (!selected) {
-          selected = video.links.reduce((prev, current) => {
-            return parseInt(current.label) > parseInt(prev.label) ? current : prev;
-          });
+          selected = video.links.reduce((prev, current) =>
+            parseInt(current.label) > parseInt(prev.label) ? current : prev
+          );
         }
 
         localStorage.setItem("video_sources", JSON.stringify(selected));
         localStorage.setItem("video_title", video.name);
-
         window.location.href = "player.html";
       };
 
@@ -271,6 +268,5 @@ async function loadVideos() {
 
 loadVideos();
 </script>
-
 </body>
 </html>
