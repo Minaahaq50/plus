@@ -16,11 +16,12 @@
     transition: background 0.3s, color 0.3s;
   }
 
+  /* ✅ الشريط العلوي */
   .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #111;
+    background: #0f0f0f;
     padding: 10px 15px;
     color: white;
     position: fixed;
@@ -28,17 +29,30 @@
     right: 0;
     left: 0;
     z-index: 1000;
-    transition: background 0.3s, color 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
 
   .menu-btn {
-    font-size: 22px;
+    font-size: 18px;
     cursor: pointer;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    padding: 5px 9px;
+    border-radius: 8px;
+    transition: 0.3s;
+  }
+
+  .menu-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: translateY(-1px);
   }
 
   .title {
-    font-size: 14px;
-    color: #f36;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffd700;
+    letter-spacing: 1px;
   }
 
   h1 {
@@ -46,6 +60,7 @@
     text-align: center;
     margin-bottom: 20px;
     text-shadow: 0 0 8px #ffd700;
+    font-size: 1.6rem;
   }
 
   ul {
@@ -56,20 +71,45 @@
   }
 
   li {
-    background:#1a1a1a;
-    margin:10px 0;
-    padding:15px;
-    border-radius:10px;
-    cursor:pointer;
-    text-align:center;
-    font-weight:bold;
-    color:#ffd700;
+    background: #1a1a1a;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    color: #ffd700;
     transition: background 0.3s, transform 0.3s;
   }
 
   li:hover {
-    background:#333;
+    background: #333;
     transform: translateY(-3px);
+  }
+
+  /* 📱 تحسين العرض على الموبايل */
+  @media (max-width: 600px) {
+    body {
+      padding: 70px 10px 20px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+    }
+
+    li {
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .menu-btn {
+      font-size: 16px;
+      padding: 4px 8px;
+    }
+
+    .title {
+      font-size: 14px;
+    }
   }
 </style>
 </head>
@@ -87,7 +127,6 @@
   </ul>
 
 <script type="module">
-// استخراج البيانات من الرابط
 const urlParams = new URLSearchParams(window.location.search);
 const subject = urlParams.get("subject");
 const teacher = urlParams.get("teacher");
@@ -96,12 +135,10 @@ const chapter = urlParams.get("chapter");
 const lecturesList = document.getElementById("lectures-list");
 const backBtn = document.getElementById("backBtn");
 
-// زر العودة للـ chapters
 backBtn.onclick = () => {
   window.location.href = `chapters.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}`;
 };
 
-// دالة لتطبيع النصوص للمقارنة الدقيقة
 function normalize(str) {
   return (str || "")
     .trim()
@@ -110,7 +147,6 @@ function normalize(str) {
     .toLowerCase();
 }
 
-// تحميل الدروس من الملف
 async function loadLectures() {
   if (!subject || !teacher || !chapter) {
     lecturesList.innerHTML = "<li>⚠️ لم يتم تحديد المادة أو المدرس أو الباب.</li>";
@@ -119,6 +155,7 @@ async function loadLectures() {
 
   try {
     const res = await fetch("coursatk_scraped_data.json");
+    if (!res.ok) throw new Error("فشل تحميل البيانات");
     const json = await res.json();
     const data = json.data || json;
 
@@ -136,9 +173,7 @@ async function loadLectures() {
               (t.chapters || []).forEach(ch => {
                 if (normalize(ch.chapter_name) === wantedChapter) {
                   (ch.lectures || []).forEach(lec => {
-                    if (lec.lecture_name) {
-                      lectures.push(lec.lecture_name);
-                    }
+                    if (lec.lecture_name) lectures.push(lec.lecture_name);
                   });
                 }
               });
@@ -155,7 +190,6 @@ async function loadLectures() {
       return;
     }
 
-    // إنشاء العناصر
     lectures.forEach(lecture => {
       const li = document.createElement("li");
       li.textContent = lecture;
