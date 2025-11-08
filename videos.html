@@ -71,8 +71,8 @@
     }
 
     .video-title {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: #ffd700;
       text-align: center;
       margin-bottom: 8px;
@@ -123,27 +123,67 @@
       color: #ffd700;
     }
 
-    /* ⚡ تحسين عرض الموبايل */
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 1.3rem;
-      }
-      .video-title {
-        font-size: 15px;
-      }
-      .thumb {
-        height: 140px;
-      }
-      body {
-        padding: 10px;
-      }
-      #videos-container {
-        gap: 12px;
-      }
-      #back {
-        padding: 5px 8px;
-        font-size: 0.8rem;
-      }
+    /* ✅ نافذة اختيار الجودات */
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .popup-content {
+      background: #1a1a1a;
+      border: 2px solid #ffd700;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+
+    .popup-content h3 {
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .quality-btn {
+      display: block;
+      background: #ffd700;
+      color: #000;
+      border: none;
+      padding: 10px 15px;
+      margin: 8px auto;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      width: 80%;
+    }
+
+    .quality-btn:hover {
+      background: #e6c200;
+      transform: translateY(-2px);
+    }
+
+    .cancel-btn {
+      margin-top: 10px;
+      background: none;
+      border: 1px solid #ffd700;
+      color: #ffd700;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cancel-btn:hover {
+      background: rgba(255,215,0,0.1);
     }
   </style>
 </head>
@@ -165,6 +205,15 @@
     © جميع الحقوق محفوظة لمنصة <span>THE BEST</span> 🔥
   </footer>
 
+  <!-- ✅ نافذة اختيار الجوده -->
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <h3>اختر الجودة 🎥</h3>
+      <div id="quality-options"></div>
+      <button class="cancel-btn" onclick="closePopup()">إلغاء</button>
+    </div>
+  </div>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const subject = urlParams.get("subject");
@@ -174,6 +223,8 @@
 
     const videosContainer = document.getElementById("videos-container");
     const backBtn = document.getElementById("back");
+    const popup = document.getElementById("popup");
+    const qualityOptions = document.getElementById("quality-options");
 
     backBtn.onclick = () => {
       window.location.href = `lecture_name.html?subject=${encodeURIComponent(subject)}&teacher=${encodeURIComponent(teacher)}&chapter=${encodeURIComponent(chapter)}`;
@@ -181,6 +232,27 @@
 
     function normalize(str) {
       return (str || "").trim().replace(/[\s.\-ـ_]/g, "").toLowerCase();
+    }
+
+    function closePopup() {
+      popup.style.display = "none";
+    }
+
+    function showQualityOptions(video) {
+      qualityOptions.innerHTML = "";
+      popup.style.display = "flex";
+
+      video.links.forEach(link => {
+        const btn = document.createElement("button");
+        btn.className = "quality-btn";
+        btn.textContent = link.label ? link.label + "p" : "غير معروف";
+        btn.onclick = () => {
+          localStorage.setItem("video_sources", JSON.stringify(link));
+          localStorage.setItem("video_title", video.name);
+          window.location.href = "player.html";
+        };
+        qualityOptions.appendChild(btn);
+      });
     }
 
     async function loadVideos() {
@@ -238,20 +310,7 @@
             <div class="video-title">${video.name}</div>
             <div class="thumb"></div>
           `;
-
-          box.querySelector(".thumb").onclick = () => {
-            let selected = video.links.find(link => parseInt(link.label) === 720);
-            if (!selected) {
-              selected = video.links.reduce((prev, current) => {
-                return parseInt(current.label) > parseInt(prev.label) ? current : prev;
-              });
-            }
-
-            localStorage.setItem("video_sources", JSON.stringify(selected));
-            localStorage.setItem("video_title", video.name);
-            window.location.href = "player.html";
-          };
-
+          box.querySelector(".thumb").onclick = () => showQualityOptions(video);
           videosContainer.appendChild(box);
         });
 
