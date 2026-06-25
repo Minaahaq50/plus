@@ -1,772 +1,1560 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>THE BEST - نظام التسجيل</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>امتحانات الثانوية العامة 2026 - فريميوم</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase v10 Modular -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"
+            }
+        }
+    </script>
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700&display=swap');
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  :root {
-    --primary: #6A11CB;
-    --secondary: #2575FC;
-    --accent: #00F5C4;
-    --success: #00C896;
-    --error: #FF4F4F;
-    --warning: #FF9800;
-    --dark: #1A1A2E;
-    --darker: #0F0F1B;
-    --light: #FFFFFF;
-    --gray: #A0A0B0;
-  }
+        :root {
+            --primary: #1a5fb4;
+            --primary-light: #e8f0fe;
+            --primary-dark: #0d3b7a;
+            --gold: #f59e0b;
+            --gold-light: #fef3c7;
+            --green: #059669;
+            --green-light: #d1fae5;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #64748b;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 30px 70px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-full: 9999px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            min-height: 100vh;
+            padding: 24px;
+        }
 
-  body {
-    font-family: 'Tajawal', sans-serif;
-    background: linear-gradient(135deg, var(--darker), var(--dark));
-    color: var(--light);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    line-height: 1.6;
-  }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
 
-  .glass-container {
-    background: rgba(26, 26, 46, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 50px 40px;
-    width: 100%;
-    max-width: 500px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(106, 17, 203, 0.2),
-      inset 0 0 20px rgba(106, 17, 203, 0.1);
-  }
+        /* ===== HEADER ===== */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+            border: 1px solid var(--gray-200);
+        }
 
-  .app-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
 
-  .app-logo {
-    font-size: 3.5rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, var(--accent), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 15px;
-    letter-spacing: 2px;
-    text-shadow: 0 4px 20px rgba(0, 245, 196, 0.3);
-  }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
 
-  .app-subtitle {
-    font-size: 1.1rem;
-    color: var(--gray);
-    font-weight: 300;
-  }
+        .logo span {
+            color: var(--primary);
+        }
 
-  .form-group {
-    margin-bottom: 28px;
-    position: relative;
-  }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-  .form-label {
-    display: block;
-    margin-bottom: 12px;
-    font-weight: 500;
-    color: var(--accent);
-    font-size: 1.1rem;
-  }
+        .btn {
+            padding: 10px 24px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
 
-  .form-input {
-    width: 100%;
-    padding: 18px 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(106, 17, 203, 0.3);
-    border-radius: 16px;
-    color: var(--light);
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    outline: none;
-  }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
 
-  .form-input::placeholder {
-    color: rgba(160, 160, 176, 0.7);
-  }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
 
-  .form-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 25px rgba(0, 245, 196, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-  }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
 
-  .form-input:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+        .btn-gold {
+            background: var(--gold);
+            color: white;
+        }
 
-  .btn {
-    width: 100%;
-    padding: 18px;
-    border: none;
-    border-radius: 16px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
+        .btn-gold:hover {
+            background: #d97706;
+        }
 
-  .btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--gray-200);
+        }
 
-  .btn:hover::before {
-    left: 100%;
-  }
+        .btn-outline:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+        }
 
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
-  }
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
 
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(106, 17, 203, 0.6);
-  }
+        .btn-danger:hover {
+            background: #fecaca;
+        }
 
-  .btn-primary:disabled {
-    background: rgba(160, 160, 176, 0.3);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: 0.8rem;
+        }
 
-  .btn-danger {
-    background: linear-gradient(135deg, var(--error), #FF6B6B);
-    color: white;
-    box-shadow: 0 8px 25px rgba(255, 79, 79, 0.4);
-    margin-top: 15px;
-  }
+        .btn-premium {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+        }
 
-  .btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(255, 79, 79, 0.6);
-  }
+        .btn-premium:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45);
+        }
 
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    right: 50%;
-    transform: translateX(50%);
-    padding: 20px 28px;
-    border-radius: 16px;
-    font-weight: 500;
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-    max-width: 90vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+        /* ===== SUBJECTS ===== */
+        .subjects-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            margin-bottom: 8px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
 
-  .toast.show {
-    opacity: 1;
-    transform: translateX(50%) translateY(-20px);
-  }
+        .subjects-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
 
-  .toast.success {
-    background: rgba(0, 200, 150, 0.9);
-    color: white;
-  }
+        .subjects-scroll::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 10px;
+        }
 
-  .toast.error {
-    background: rgba(255, 79, 79, 0.9);
-    color: white;
-  }
+        .subject-chip {
+            flex: 0 0 auto;
+            padding: 10px 24px;
+            border-radius: var(--radius-full);
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            position: relative;
+        }
 
-  .toast.warning {
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-  }
+        .subject-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
 
-  .loader {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 1s ease-in-out infinite;
-    margin-right: 10px;
-  }
+        .subject-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(26, 95, 180, 0.25);
+        }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+        .subject-chip.premium {
+            border-color: var(--gold);
+            background: var(--gold-light);
+        }
 
-  .status-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 15px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    margin: 20px 0;
-    font-size: 0.95rem;
-  }
+        .subject-chip.premium::after {
+            content: '⭐';
+            margin-right: 6px;
+        }
 
-  .status-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--success);
-    animation: pulse 2s infinite;
-  }
+        .subject-chip.premium.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
 
-  .status-dot.connecting {
-    background: var(--warning);
-  }
+        .subject-chip.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-  .status-dot.error {
-    background: var(--error);
-  }
+        .subject-chip .lock-icon {
+            font-size: 0.7rem;
+            margin-right: 4px;
+        }
 
-  .waiting-screen {
-    text-align: center;
-    padding: 30px 0;
-  }
+        /* ===== EXAMS GRID ===== */
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
 
-  .waiting-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
+        .exam-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
 
-  .waiting-title {
-    font-size: 1.8rem;
-    margin-bottom: 15px;
-    color: var(--accent);
-    font-weight: 600;
-  }
+        .exam-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--gray-300);
+        }
 
-  .waiting-message {
-    color: var(--gray);
-    margin-bottom: 30px;
-    line-height: 1.8;
-  }
+        .exam-card.premium-card {
+            border-color: var(--gold);
+            border-width: 2px;
+        }
 
-  .waiting-info {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
-    border-radius: 16px;
-    margin: 20px 0;
-    text-align: right;
-  }
+        .exam-card.premium-card::before {
+            content: '⭐ مدفوع';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--gold);
+            color: white;
+            padding: 4px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            z-index: 5;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+        }
 
-  .info-item {
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-  }
+        .exam-card.locked-card {
+            opacity: 0.7;
+            filter: grayscale(0.3);
+        }
 
-  .info-label {
-    color: var(--gray);
-    font-weight: 500;
-  }
+        .exam-card.locked-card .exam-image-wrap {
+            cursor: not-allowed;
+        }
 
-  .info-value {
-    color: var(--light);
-    font-weight: 600;
-  }
+        .exam-card.locked-card .exam-actions .btn {
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
+        .exam-card .lock-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: var(--radius);
+            flex-direction: column;
+            gap: 12px;
+        }
 
-  @media (max-width: 768px) {
-    .glass-container {
-      padding: 40px 30px;
-      margin: 10px;
-    }
-    
-    .app-logo {
-      font-size: 2.8rem;
-    }
-    
-    .form-input {
-      padding: 16px 20px;
-    }
-    
-    .btn {
-      padding: 16px;
-    }
+        .exam-card.locked-card .lock-overlay {
+            display: flex;
+        }
 
-    .waiting-icon {
-      font-size: 3rem;
-    }
+        .exam-card .lock-overlay .lock-icon {
+            font-size: 3rem;
+            color: white;
+        }
 
-    .waiting-title {
-      font-size: 1.5rem;
-    }
-  }
+        .exam-card .lock-overlay .lock-text {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
 
-  @media (max-width: 480px) {
-    .glass-container {
-      padding: 30px 25px;
-    }
-    
-    .app-logo {
-      font-size: 2.4rem;
-    }
-    
-    .app-subtitle {
-      font-size: 1rem;
-    }
-    
-    .form-input {
-      padding: 14px 18px;
-      font-size: 1rem;
-    }
-    
-    .btn {
-      font-size: 1.1rem;
-      padding: 14px;
-    }
+        .exam-card .lock-overlay .btn {
+            background: var(--gold);
+            color: white;
+            padding: 10px 30px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
 
-    .waiting-icon {
-      font-size: 2.5rem;
-    }
+        .exam-card .lock-overlay .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
 
-    .waiting-title {
-      font-size: 1.3rem;
-    }
+        .exam-image-wrap {
+            position: relative;
+            aspect-ratio: 16/10;
+            background: var(--gray-100);
+            overflow: hidden;
+            cursor: pointer;
+        }
 
-    .waiting-info {
-      padding: 15px;
-    }
-  }
-</style>
+        .exam-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .exam-image-wrap:hover img {
+            transform: scale(1.05);
+        }
+
+        .exam-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 4px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .exam-body {
+            padding: 20px;
+        }
+
+        .exam-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            color: var(--gray-900);
+        }
+
+        .exam-subject {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .exam-subject.premium-tag {
+            background: var(--gold-light);
+            color: #92400e;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .exam-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .exam-actions .btn-outline {
+            flex: 0.7;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius);
+            border: 2px dashed var(--gray-200);
+        }
+
+        .empty-state .icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--gray-600);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-overlay img {
+            max-width: 92%;
+            max-height: 92%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+            object-fit: contain;
+            background: white;
+            padding: 8px;
+        }
+
+        .modal-close {
+            position: fixed;
+            top: 28px;
+            left: 28px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-700);
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+            background: var(--gray-100);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            margin-top: 40px;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .admin-panel.hidden {
+            display: none;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-header h2 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            max-width: 700px;
+        }
+
+        .admin-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .admin-form label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .admin-form input,
+        .admin-form select {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: var(--radius);
+            border: 1.5px solid var(--gray-200);
+            background: var(--gray-50);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .admin-form input:focus,
+        .admin-form select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(26, 95, 180, 0.1);
+            background: white;
+        }
+
+        .admin-form .file-upload {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--gray-50);
+        }
+
+        .admin-form .file-upload:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .admin-form .file-upload input {
+            display: none;
+        }
+
+        .admin-exams-list {
+            margin-top: 28px;
+            border-top: 1px solid var(--gray-200);
+            padding-top: 24px;
+        }
+
+        .admin-exams-list h3 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: var(--gray-700);
+        }
+
+        .admin-exam-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .admin-exam-item:hover {
+            border-color: var(--gray-300);
+        }
+
+        .admin-exam-item .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .admin-exam-item .info .title {
+            font-weight: 600;
+        }
+
+        .admin-exam-item .info .subject-tag {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .admin-exam-item .info .premium-tag {
+            background: var(--gold-light);
+            color: #92400e;
+        }
+
+        /* ===== LOGIN / AUTH ===== */
+        .login-box {
+            max-width: 400px;
+            background: var(--gray-50);
+            padding: 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+        }
+
+        .login-box input {
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .login-box .hint {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-top: 10px;
+        }
+
+        /* ===== PREMIUM UPGRADE MODAL ===== */
+        .premium-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .premium-modal-overlay.active {
+            display: flex;
+        }
+
+        .premium-modal {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .premium-modal .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .premium-modal h2 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: var(--gray-900);
+        }
+
+        .premium-modal p {
+            color: var(--gray-600);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .premium-modal .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 24px;
+        }
+
+        .premium-modal .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--gray-600);
+        }
+
+        .premium-modal .features {
+            text-align: right;
+            margin-bottom: 24px;
+            padding: 0 20px;
+        }
+
+        .premium-modal .features li {
+            list-style: none;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .premium-modal .features li::before {
+            content: '✅';
+        }
+
+        .premium-modal .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+            font-size: 1.1rem;
+        }
+
+        .premium-modal .close-premium {
+            margin-top: 12px;
+            background: transparent;
+            border: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--gray-900);
+            color: white;
+            padding: 14px 28px;
+            border-radius: var(--radius-full);
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 3000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #065f46;
+        }
+
+        .toast.error {
+            background: #991b1b;
+        }
+
+        .toast.premium {
+            background: var(--gold);
+            color: #78350f;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            .header {
+                padding: 14px 20px;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .admin-form {
+                grid-template-columns: 1fr;
+            }
+            .exams-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 16px;
+            }
+            .admin-panel {
+                padding: 20px;
+            }
+            .modal-close {
+                top: 16px;
+                left: 16px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+            .premium-modal {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exams-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-actions .btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            .subject-chip {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 10px;
+        }
+
+        /* ===== USER BADGE ===== */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 16px 6px 20px;
+            border-radius: var(--radius-full);
+            background: var(--gray-100);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .user-badge .premium-star {
+            color: var(--gold);
+        }
+
+        .user-badge .user-email {
+            color: var(--gray-600);
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
 
-<div class="glass-container">
-  <div class="app-header">
-    <h1 class="app-logo">𝑷𝒍𝒂𝒕𝒇𝒐𝒓𝒎: 𝑻𝑯𝑬 𝑩𝑬𝑺𝑻</h1>
-    <p class="app-subtitle">🏆 𝑻𝒉𝒊𝒔 𝒀𝒆𝒂𝒓 𝒅𝒆𝒄𝒊𝒅𝒆𝒔 𝒀𝒐𝒖𝒓 𝑭𝒖𝒕𝒖𝒓𝒆 — 𝐓𝐇𝐄 𝐁𝐄𝐒𝐓 </p>
-  </div>
+    <div class="container" id="app">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📘</div>
+                <div>امتحانات <span>2026</span></div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="homeBtn">🏠 الرئيسية</button>
+                <button class="btn btn-gold" id="upgradeBtn">⭐ اشتراك مميز</button>
+                <button class="btn btn-primary" id="adminToggleBtn">⚙️ لوحة الأدمن</button>
+                <div id="authButtons">
+                    <button class="btn" id="loginModalBtn">🔐 تسجيل</button>
+                </div>
+                <div id="userBadge" class="user-badge hidden">
+                    <span id="userName">مستخدم</span>
+                    <span class="user-email" id="userEmail"></span>
+                    <button class="btn btn-sm btn-outline" id="logoutBtn">🚪</button>
+                </div>
+            </div>
+        </header>
 
-  <div id="statusIndicator" class="status-indicator" style="display: none;">
-    <div class="status-dot connecting"></div>
-    <span>𝑪𝒐𝒏𝒏𝒆𝒄𝒕𝒊𝒏𝒈 𝒕𝒐 𝒔𝒆𝒓𝒗𝒆𝒓...</span>
-  </div>
-
- <!-- Waiting Screen (hidden by default) -->
-<div id="waitingScreen" class="waiting-screen" style="display: none;">
-    <div class="waiting-icon">⏳</div>
-    <h2 class="waiting-title">𝒀𝒐𝒖𝒓 𝑹𝒆𝒒𝒖𝒆𝒔𝒕 𝒊𝒔 𝑼𝒏𝒅𝒆𝒓 𝑹𝒆𝒗𝒊𝒆𝒘</h2>
-    <p class="waiting-message">
-        𝒀𝒐𝒖𝒓 𝑹𝒆𝒒𝒖𝒆𝒔𝒕 𝒉𝒂𝒔 𝒃𝒆𝒆𝒏 𝒔𝒖𝒄𝒄𝒆𝒔𝒔𝒇𝒖𝒍𝒍𝒚 𝒓𝒆𝒄𝒆𝒊𝒗𝒆𝒅 𝒂𝒏𝒅 𝒊𝒔 𝒄𝒖𝒓𝒓𝒆𝒏𝒕𝒍𝒚 𝒖𝒏𝒅𝒆𝒓 𝑹𝒆𝒗𝒊𝒆𝒘 𝒃𝒚 𝒐𝒖𝒓 𝒕𝒆𝒂𝒎.<br>
-        𝒀𝒐𝒖 𝒘𝒊𝒍𝒍 𝒃𝒆 𝒏𝒐𝒕𝒊𝒇𝒊𝒆𝒅 𝒂𝒔 𝒔𝒐𝒐𝒏 𝒂𝒔 𝒚𝒐𝒖𝒓 𝑹𝒆𝒒𝒖𝒆𝒔𝒕 𝒊𝒔 𝒂𝒑𝒑𝒓𝒐𝒗𝒆𝒅.
-    </p>
-
-    <div id="waitingInfo" class="waiting-info">
-        <div class="info-item">
-            <span class="info-label">𝑵𝒂𝒎𝒆:</span>
-            <span id="waitingName" class="info-value">-</span>
+        <!-- SUBJECTS -->
+        <div class="subjects-scroll" id="subjectsContainer">
+            <button class="subject-chip active" data-subject="الكل">📚 الكل</button>
+            <button class="subject-chip" data-subject="اللغة العربية" data-free="true">🇸🇦 عربي <span style="font-size:0.7rem;color:#059669;">(مجاني)</span></button>
+            <button class="subject-chip premium" data-subject="اللغة الإنجليزية" data-free="false">🇬🇧 إنجليزي</button>
+            <button class="subject-chip premium" data-subject="الفيزياء" data-free="false">⚛️ فيزياء</button>
+            <button class="subject-chip premium" data-subject="الكيمياء" data-free="false">🧪 كيمياء</button>
+            <button class="subject-chip premium" data-subject="الأحياء" data-free="false">🧬 أحياء</button>
+            <button class="subject-chip premium" data-subject="الرياضيات" data-free="false">📐 رياضيات</button>
         </div>
-        <div class="info-item">
-            <span class="info-label">𝑷𝒉𝒐𝒏𝒆 𝑵𝒖𝒎𝒃𝒆𝒓:</span>
-            <span id="waitingPhone" class="info-value">-</span>
+
+        <!-- EXAMS GRID -->
+        <div class="exams-grid" id="examsContainer"></div>
+
+        <!-- MODAL (Image Zoom) -->
+        <div class="modal-overlay" id="imageModal">
+            <button class="modal-close" id="modalCloseBtn">✕</button>
+            <img id="modalImage" src="" alt="تكبير الامتحان" />
         </div>
-        <div class="info-item">
-            <span class="info-label">𝑹𝒆𝒒𝒖𝒆𝒔𝒕 𝑺𝒕𝒂𝒕𝒖𝒔:</span>
-            <span class="info-value" style="color: var(--warning);">𝑷𝒂𝒚𝒎𝒆𝒏𝒕 𝑷𝒆𝒏𝒅𝒊𝒏𝒈</span>
+
+        <!-- PREMIUM UPGRADE MODAL -->
+        <div class="premium-modal-overlay" id="premiumModal">
+            <div class="premium-modal">
+                <div class="icon">⭐</div>
+                <h2>اشتراك مميز</h2>
+                <p>احصل على إمكانية الوصول الكامل إلى جميع امتحانات المواد المدفوعة</p>
+                <div class="price">$9.99 <span>/ شهرياً</span></div>
+                <ul class="features">
+                    <li>جميع مواد الثانوية العامة</li>
+                    <li>امتحانات شاملة مع الحلول</li>
+                    <li>تحديثات مستمرة</li>
+                    <li>دعم أولوية</li>
+                </ul>
+                <button class="btn btn-premium" id="subscribeBtn">⭐ اشترك الآن</button>
+                <button class="close-premium" id="closePremiumModal">تخطي</button>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div class="admin-panel hidden" id="adminPanel">
+            <div class="admin-header">
+                <h2>🛠️ لوحة التحكم</h2>
+                <div id="authStatus">
+                    <span id="authStatusText" style="color:var(--gray-600);font-size:0.9rem;">غير مسجل</span>
+                </div>
+            </div>
+
+            <!-- Login -->
+            <div id="loginSection">
+                <div class="login-box" id="loginForm">
+                    <h3 style="margin-bottom:16px;">🔐 تسجيل الدخول</h3>
+                    <input type="email" id="adminEmail" placeholder="البريد الإلكتروني" />
+                    <input type="password" id="adminPassword" placeholder="كلمة المرور" />
+                    <button class="btn btn-primary" id="loginBtn" style="width:100%;justify-content:center;">دخول</button>
+                    <div class="hint">💡 للتجربة: <strong>admin@exam.com</strong> / <strong>admin2026</strong></div>
+                    <div style="margin-top:10px;text-align:center;">
+                        <button class="btn btn-outline btn-sm" id="registerBtn">إنشاء حساب</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Content -->
+            <div id="adminContent" class="hidden">
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+                    <button class="btn btn-danger btn-sm" id="adminLogoutBtn">🚪 تسجيل خروج</button>
+                </div>
+
+                <form class="admin-form" id="uploadForm">
+                    <div>
+                        <label>المادة</label>
+                        <select id="subjectSelect">
+                            <option value="اللغة العربية">اللغة العربية (مجاني)</option>
+                            <option value="اللغة الإنجليزية">اللغة الإنجليزية (مدفوع)</option>
+                            <option value="الفيزياء">الفيزياء (مدفوع)</option>
+                            <option value="الكيمياء">الكيمياء (مدفوع)</option>
+                            <option value="الأحياء">الأحياء (مدفوع)</option>
+                            <option value="الرياضيات">الرياضيات (مدفوع)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>عنوان الامتحان</label>
+                        <input type="text" id="examTitle" placeholder="مثال: امتحان فيزياء 2026" />
+                    </div>
+                    <div class="full-width">
+                        <label>رفع الصورة</label>
+                        <div class="file-upload" id="fileUploadArea">
+                            <span style="display:block;font-size:2rem;margin-bottom:4px;">🖼️</span>
+                            <span style="color:var(--gray-600);">اضغط لاختيار صورة</span>
+                            <input type="file" id="imageFile" accept="image/*" />
+                        </div>
+                    </div>
+                    <div class="full-width" style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button type="submit" class="btn btn-primary" id="uploadBtn">📤 رفع الامتحان</button>
+                    </div>
+                </form>
+
+                <div class="admin-exams-list">
+                    <h3>📋 إدارة الامتحانات</h3>
+                    <div id="adminExamsList"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <button id="cancelRequestBtn" class="btn btn-danger">
-        𝑪𝒂𝒏𝒄𝒆𝒍 𝑹𝒆𝒒𝒖𝒆𝒔𝒕
-    </button>
-</div>
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
 
+    <script type="module">
+        // ============================================================
+        //  FIREBASE CONFIG
+        // ============================================================
+        import { initializeApp } from 'firebase/app';
+        import { getDatabase, ref, push, set, onValue, remove } from 'firebase/database';
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut
+        } from 'firebase/auth';
 
-  <!-- نموذج التسجيل (مخفي عند وجود طلب معلق) -->
-  <div id="registrationForm">
-    <div class="form-group">
-      <label for="studentName" class="form-label">𝑺𝒕𝒖𝒅𝒆𝒏𝒕 𝒏𝒂𝒎𝒆</label>
-      <input 
-        type="text" 
-        id="studentName" 
-        class="form-input" 
-        placeholder="𝐄𝐧𝐭𝐞𝐫 𝐲𝐨𝐮𝐫 𝐟𝐮𝐥𝐥 𝐧𝐚𝐦𝐞" 
-        autocomplete="name"
-      />
-    </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyFirebaseConfigReplaceMe",
+            authDomain: "exam2026-9b3a1.firebaseapp.com",
+            databaseURL: "https://exam2026-9b3a1-default-rtdb.firebaseio.com",
+            projectId: "exam2026-9b3a1",
+            storageBucket: "exam2026-9b3a1.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
+        };
 
-    <div class="form-group">
-      <label for="studentPhone" class="form-label">𝑺𝒕𝒖𝒅𝒆𝒏𝒕 𝒑𝒉𝒐𝒏𝒆 𝒏𝒖𝒎𝒃𝒆𝒓</label>
-      <input 
-        type="text" 
-        id="studentPhone" 
-        class="form-input" 
-        placeholder="𝑬𝒏𝒕𝒆𝒓 𝒑𝒉𝒐𝒏𝒆 𝒏𝒖𝒎𝒃𝒆𝒓 (𝟏𝟏 𝒅𝒊𝒈𝒊𝒕𝒔)" 
-        autocomplete="tel"
-        inputmode="numeric"
-      />
-    </div>
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+        const examsRef = ref(database, 'exams');
 
-    <button id="submitBtn" class="btn btn-primary" disabled>
-      <span class="btn-content">𝑺𝒖𝒃𝒎𝒊𝒕𝒕𝒊𝒏𝒈 𝒓𝒆𝒒𝒖𝒆𝒔𝒕...</span>
-    </button>
+        // ============================================================
+        //  STATE
+        // ============================================================
+        let allExams = [];
+        let currentSubject = 'الكل';
+        let isAdmin = false;
+        let currentUser = null;
+        let isPremium = false;
 
-    <button id="deleteBtn" class="btn btn-danger" style="display: none;">
-      𝑪𝒂𝒏𝒄𝒆𝒍 𝑹𝒆𝒒𝒖𝒆𝒔𝒕
-    </button>
-  </div>
-</div>
+        // المواد المدفوعة
+        const PREMIUM_SUBJECTS = ['اللغة الإنجليزية', 'الفيزياء', 'الكيمياء', 'الأحياء', 'الرياضيات'];
+        const FREE_SUBJECTS = ['اللغة العربية'];
 
-<div id="toast" class="toast" role="alert"></div>
+        // ============================================================
+        //  DOM REFS
+        // ============================================================
+        const $ = (id) => document.getElementById(id);
+        const examsContainer = $('examsContainer');
+        const subjectsContainer = $('subjectsContainer');
+        const adminPanel = $('adminPanel');
+        const adminToggleBtn = $('adminToggleBtn');
+        const loginForm = $('loginForm');
+        const adminContent = $('adminContent');
+        const loginBtn = $('loginBtn');
+        const registerBtn = $('registerBtn');
+        const adminLogoutBtn = $('adminLogoutBtn');
+        const adminEmail = $('adminEmail');
+        const adminPassword = $('adminPassword');
+        const uploadForm = $('uploadForm');
+        const subjectSelect = $('subjectSelect');
+        const examTitle = $('examTitle');
+        const imageFile = $('imageFile');
+        const fileUploadArea = $('fileUploadArea');
+        const adminExamsList = $('adminExamsList');
+        const modal = $('imageModal');
+        const modalImage = $('modalImage');
+        const modalCloseBtn = $('modalCloseBtn');
+        const homeBtn = $('homeBtn');
+        const toast = $('toast');
+        const authStatusText = $('authStatusText');
+        const authButtons = $('authButtons');
+        const userBadge = $('userBadge');
+        const userName = $('userName');
+        const userEmail = $('userEmail');
+        const logoutBtn = $('logoutBtn');
+        const loginModalBtn = $('loginModalBtn');
+        const upgradeBtn = $('upgradeBtn');
+        const premiumModal = $('premiumModal');
+        const closePremiumModal = $('closePremiumModal');
+        const subscribeBtn = $('subscribeBtn');
 
-<script>
-  const firebaseConfig = {
-  apiKey: "AIzaSyBlGgAa0SDuvd8KM6pTalQh1J5PRXgcmSk",
-  authDomain: "plus-c3d02.firebaseapp.com",
-  projectId: "plus-c3d02",
-  storageBucket: "plus-c3d02.firebasestorage.app",
-  messagingSenderId: "61620553895",
-  appId: "1:61620553895:web:c186ce886c28d269523382",
-  measurementId: "G-5EBPB2GM4L"
-};
+        // ============================================================
+        //  TOAST
+        // ============================================================
+        let toastTimeout;
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const auth = firebase.auth();
-
-  const submitBtn = document.getElementById("submitBtn");
-  const deleteBtn = document.getElementById("deleteBtn");
-  const cancelRequestBtn = document.getElementById("cancelRequestBtn");
-  const toast = document.getElementById("toast");
-  const studentNameInput = document.getElementById("studentName");
-  const studentPhoneInput = document.getElementById("studentPhone");
-  const statusIndicator = document.getElementById("statusIndicator");
-  const registrationForm = document.getElementById("registrationForm");
-  const waitingScreen = document.getElementById("waitingScreen");
-  const waitingName = document.getElementById("waitingName");
-  const waitingPhone = document.getElementById("waitingPhone");
-  const btnContent = submitBtn.querySelector('.btn-content');
-
-  let currentUid = localStorage.getItem("localUid") || null;
-  let pendingRequestData = null;
-
-  function validateInputs() {
-    const name = studentNameInput.value.trim();
-    const phone = studentPhoneInput.value.trim();
-    const phoneValid = /^\d{11}$/.test(phone);
-    submitBtn.disabled = !(name && phoneValid);
-  }
-
-  function updateButtonText(text, showLoader = false) {
-    if (showLoader) {
-      btnContent.innerHTML = `<span class="loader"></span> ${text}`;
-    } else {
-      btnContent.textContent = text;
-    }
-  }
-
-  function showToast(message, type = "success") {
-    toast.textContent = message;
-    toast.className = `toast ${type} show`;
-    clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => {
-      toast.className = `toast ${type}`;
-    }, 3500);
-  }
-
-  function showWaitingScreen(requestData) {
-    registrationForm.style.display = 'none';
-    waitingScreen.style.display = 'block';
-    
-    if (requestData) {
-      waitingName.textContent = requestData.name || '-';
-      waitingPhone.textContent = requestData.phone || '-';
-    }
-  }
-
-  function showRegistrationForm() {
-    waitingScreen.style.display = 'none';
-    registrationForm.style.display = 'block';
-  }
-
-  function initAuth() {
-    statusIndicator.style.display = 'flex';
-    updateButtonText('جاري التحضير...', true);
-    
-    auth.signInAnonymously()
-      .then(res => {
-        if (res.user && res.user.uid) {
-          currentUid = res.user.uid;
-          localStorage.setItem("localUid", currentUid);
-          statusIndicator.style.display = 'none';
-          updateButtonText('ارسال الطلب', false);
-          submitBtn.disabled = false;
-          checkIfApproved();
-          checkExistingRequest();
-          listenForDeletion();
-          listenForApproval(); // ✅ أضف هذا السطر هنا
-          
-        } else {
-          throw new Error("لم يتم الحصول على UID.");
-        }
-      })
-      .catch(err => {
-        statusIndicator.style.display = 'none';
-        updateButtonText('ارسال الطلب', false);
-        showToast("❌ فشل في الاتصال بالخادم", "error");
-        console.error("Auth Error:", err);
-      });
-  }
-
-  // ✅ الاستماع لحالة القبول التلقائي للطالب
-function listenForApproval() {
-  if (!currentUid) return;
-  
-  db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).on("value", snap => {
-    if (snap.exists()) {
-      const key = Object.keys(snap.val())[0];
-      const data = snap.val()[key];
-
-      // التحقق من صلاحية القبول
-      if (data.expiry && Date.now() > data.expiry) {
-        showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
-        localStorage.removeItem("approved");
-        return;
-      }
-
-      // حفظ البيانات في localStorage
-      localStorage.setItem("approved", "true");
-      localStorage.setItem("studentName", data.name || "");
-      localStorage.setItem("studentPhone", data.phone || "");
-
-      // إشعار وتحويل تلقائي
-      showToast("✅ تم قبولك! جارٍ فتح الصفحة...", "success");
-      setTimeout(() => {
-        window.location.href = "subjects.html";
-      }, 1200);
-    }
-  });
-}
-
-  function checkIfApproved() {
-    if (!currentUid) return;
-    db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).once("value")
-      .then(snap => {
-        if (snap.exists()) {
-          const key = Object.keys(snap.val())[0];
-          const data = snap.val()[key];
-
-          if (data.expiry && Date.now() > data.expiry) {
-            showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
-            localStorage.removeItem("approved");
-            return;
-          }
-
-          if (data.name) localStorage.setItem("studentName", data.name);
-          if (data.phone) localStorage.setItem("studentPhone", data.phone);
-
-          localStorage.setItem("approved", "true");
-          window.location.href = "subjects.html";
-        } else {
-          localStorage.removeItem("approved");
-        }
-      });
-  }
-
-  function checkExistingRequest() {
-    if (!currentUid) return;
-    db.ref("pendingStudents/" + currentUid).once("value")
-      .then(snap => {
-        if (snap.exists()) {
-          const requestData = snap.val();
-          pendingRequestData = requestData;
-          
-          // إظهار شاشة الانتظار وإخفاء النموذج
-          showWaitingScreen(requestData);
-          showToast("لديك طلب معلق قيد المراجعة", "warning");
-          
-        } else {
-          showRegistrationForm();
-          deleteBtn.style.display = "none";
-        }
-      })
-      .catch(err => {
-        console.error("Error checking existing request:", err);
-        showRegistrationForm();
-      });
-  }
-
-  function listenForDeletion() {
-    if (!currentUid) return;
-    db.ref("approvedStudents").orderByChild("deviceId").equalTo(currentUid).on("value", snap => {
-      if (snap.exists()) {
-        const key = Object.keys(snap.val())[0];
-        const data = snap.val()[key];
-
-        if (data.expiry && Date.now() > data.expiry) {
-          showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
-          localStorage.removeItem("approved");
-          setTimeout(() => { location.reload(); }, 1500);
-          return;
+        function showToast(message, type = '') {
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            clearTimeout(toastTimeout);
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        if (data.name) localStorage.setItem("studentName", data.name);
-        if (data.phone) localStorage.setItem("studentPhone", data.phone);
+        // ============================================================
+        //  AUTH
+        // ============================================================
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                isAdmin = user.email === 'admin@exam.com';
+                authButtons.classList.add('hidden');
+                userBadge.classList.remove('hidden');
+                userName.textContent = user.displayName || user.email?.split('@')[0] || 'مستخدم';
+                userEmail.textContent = user.email || '';
 
-        localStorage.setItem("approved", "true");
-      } else {
-        if (localStorage.getItem("approved") === "true") {
-          localStorage.removeItem("approved");
-          showToast("تم حذفك من النظام، يرجى إعادة التسجيل", "error");
-          setTimeout(() => { location.reload(); }, 1500);
+                // تحقق من الاشتراك المميز (محاكاة)
+                // في الواقع يمكن تخزين حالة الاشتراك في Realtime Database
+                // لكن للمثال سنعتبر أن أي مستخدم مسجل لديه اشتراك مميز
+                // (للتجربة، سيتم منح الاشتراك للمستخدمين المسجلين)
+                isPremium = true;
+                updatePremiumUI();
+
+                if (isAdmin) {
+                    authStatusText.textContent = '✅ أدمن';
+                    authStatusText.style.color = '#065f46';
+                    loginForm.classList.add('hidden');
+                    adminContent.classList.remove('hidden');
+                    renderAdminList();
+                } else {
+                    authStatusText.textContent = '✅ مستخدم';
+                    authStatusText.style.color = '#065f46';
+                }
+                renderExams(currentSubject);
+                showToast(`👋 مرحباً ${user.email}`, 'success');
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                isPremium = false;
+                authButtons.classList.remove('hidden');
+                userBadge.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+                authStatusText.textContent = 'غير مسجل';
+                authStatusText.style.color = 'var(--gray-600)';
+                updatePremiumUI();
+                renderExams(currentSubject);
+            }
+        });
+
+        // تسجيل الدخول
+        loginBtn.addEventListener('click', async () => {
+            const email = adminEmail.value.trim();
+            const pass = adminPassword.value.trim();
+            if (!email || !pass) {
+                showToast('⚠️ يرجى إدخال البريد وكلمة المرور', 'error');
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showToast('✅ تم تسجيل الدخول', 'success');
+            } catch (error) {
+                showToast('❌ فشل تسجيل الدخول: ' + error.message, 'error');
+            }
+        });
+
+        // إنشاء حساب
+        registerBtn.addEventListener('click', async () => {
+            const email = adminEmail.value.trim();
+            const pass = adminPassword.value.trim();
+            if (!email || !pass) {
+                showToast('⚠️ يرجى إدخال البريد وكلمة المرور', 'error');
+                return;
+            }
+            if (pass.length < 6) {
+                showToast('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                showToast('✅ تم إنشاء الحساب بنجاح', 'success');
+            } catch (error) {
+                showToast('❌ فشل إنشاء الحساب: ' + error.message, 'error');
+            }
+        });
+
+        // تسجيل الخروج
+        logoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            showToast('🔓 تم تسجيل الخروج', '');
+        });
+
+        adminLogoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            showToast('🔓 تم تسجيل الخروج', '');
+        });
+
+        // فتح نافذة تسجيل الدخول
+        loginModalBtn.addEventListener('click', () => {
+            adminPanel.classList.remove('hidden');
+            adminPanel.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ============================================================
+        //  PREMIUM
+        // ============================================================
+        function isSubjectFree(subject) {
+            return FREE_SUBJECTS.includes(subject);
         }
-      }
-    });
-  }
 
-  studentNameInput.addEventListener("input", validateInputs);
-  studentPhoneInput.addEventListener("input", validateInputs);
-
-  submitBtn.addEventListener("click", () => {
-    if (!currentUid) {
-      showToast("خطأ في الاتصال، يرجى المحاولة مرة أخرى", "error");
-      return;
-    }
-
-    const name = studentNameInput.value.trim();
-    const phone = studentPhoneInput.value.trim();
-
-    if (!name || !phone) {
-      showToast("يرجى ملء جميع الحقول", "error");
-      return;
-    }
-
-    if (!/^\d{11}$/.test(phone)) {
-      showToast("رقم الهاتف يجب أن يكون 11 رقماً", "error");
-      return;
-    }
-
-    localStorage.setItem("studentName", name);
-    localStorage.setItem("studentPhone", phone);
-    updateButtonText('جاري الإرسال...', true);
-
-    db.ref("approvedStudents").orderByChild("phone").equalTo(phone).once("value")
-      .then(snap2 => {
-        if (snap2.exists()) {
-          const approvedKey = Object.keys(snap2.val())[0];
-          const approvedData = snap2.val()[approvedKey];
-
-          if (approvedData.deviceId && approvedData.deviceId !== currentUid) {
-            showToast("هذا الحساب مسجل من جهاز آخر", "error");
-            updateButtonText('ارسال الطلب', false);
-            return;
-          }
-
-          if (!approvedData.deviceId) {
-            db.ref("approvedStudents/"+approvedKey).update({ deviceId: currentUid });
-          }
-
-          if (approvedData.expiry && Date.now() > approvedData.expiry) {
-            showToast("انتهت صلاحية الكود، يرجى إعادة التسجيل", "error");
-            updateButtonText('ارسال الطلب', false);
-            return;
-          }
-
-          showToast("تم الموافقة مسبقاً على هذا الرقم", "success");
-          localStorage.setItem("approved","true");
-          setTimeout(() => { window.location.href="subjects.html"; }, 1000);
-        } else {
-          db.ref("pendingStudents/"+currentUid).set({
-            name, phone, deviceId: currentUid, timestamp: Date.now()
-          }).then(() => {
-            showToast("تم إرسال طلبك، انتظر الموافقة", "success");
-            updateButtonText('ارسال الطلب', false);
-            
-            // إظهار شاشة الانتظار بعد الإرسال الناجح
-            showWaitingScreen({ name, phone });
-            
-          }).catch(err => {
-            showToast("حدث خطأ أثناء الإرسال", "error");
-            updateButtonText('ارسال الطلب', false);
-            console.error(err);
-          });
+        function isSubjectPremium(subject) {
+            return PREMIUM_SUBJECTS.includes(subject);
         }
-      })
-      .catch(err => {
-        showToast("خطأ في الاتصال بالخادم", "error");
-        updateButtonText('ارسال الطلب', false);
-        console.error(err);
-      });
-  });
 
-  deleteBtn.addEventListener("click", () => {
-    if (!currentUid) return;
-    db.ref("pendingStudents/"+currentUid).remove()
-      .then(() => {
-        showToast("تم حذف الطلب بنجاح", "success");
-        deleteBtn.style.display = "none";
-        showRegistrationForm();
-      })
-      .catch(err => {
-        showToast("حدث خطأ أثناء الحذف", "error");
-        console.error(err);
-      });
-  });
+        function canAccessSubject(subject) {
+            if (isSubjectFree(subject)) return true;
+            return isPremium || currentUser !== null; // أي مستخدم مسجل لديه وصول (للتجربة)
+        }
 
-  cancelRequestBtn.addEventListener("click", () => {
-    if (!currentUid) return;
-    db.ref("pendingStudents/"+currentUid).remove()
-      .then(() => {
-        showToast("تم إلغاء الطلب بنجاح", "success");
-        showRegistrationForm();
-      })
-      .catch(err => {
-        showToast("حدث خطأ أثناء الإلغاء", "error");
-        console.error(err);
-      });
-  });
+        function updatePremiumUI() {
+            // تحديث شكل الأزرار
+            document.querySelectorAll('.subject-chip').forEach(chip => {
+                const subject = chip.dataset.subject;
+                if (isSubjectPremium(subject)) {
+                    chip.classList.add('premium');
+                    if (!canAccessSubject(subject)) {
+                        chip.classList.add('locked');
+                        chip.innerHTML = chip.innerHTML.replace('⭐', '🔒');
+                    } else {
+                        chip.classList.remove('locked');
+                        if (!chip.innerHTML.includes('⭐')) {
+                            chip.innerHTML = chip.innerHTML + ' ⭐';
+                        }
+                    }
+                }
+            });
+        }
 
-  initAuth();
-</script>
+        // نافذة الاشتراك المميز
+        upgradeBtn.addEventListener('click', () => {
+            if (currentUser) {
+                showToast('✅ أنت بالفعل مستخدم مميز!', 'premium');
+                return;
+            }
+            premiumModal.classList.add('active');
+        });
+
+        closePremiumModal.addEventListener('click', () => {
+            premiumModal.classList.remove('active');
+        });
+
+        premiumModal.addEventListener('click', (e) => {
+            if (e.target === premiumModal) premiumModal.classList.remove('active');
+        });
+
+        subscribeBtn.addEventListener('click', () => {
+            premiumModal.classList.remove('active');
+            if (!currentUser) {
+                showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+                adminPanel.classList.remove('hidden');
+                adminPanel.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            isPremium = true;
+            updatePremiumUI();
+            renderExams(currentSubject);
+            showToast('⭐ تم تفعيل الاشتراك المميز!', 'premium');
+        });
+
+        // ============================================================
+        //  RENDER EXAMS
+        // ============================================================
+        function renderExams(subject = 'الكل') {
+            let filtered = subject === 'الكل' ? allExams : allExams.filter(e => e.subject === subject);
+            filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            if (filtered.length === 0) {
+                examsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3>لا توجد امتحانات</h3>
+                        <p>لم يتم إضافة أي امتحانات لهذه المادة بعد</p>
+                    </div>
+                `;
+                return;
+            }
+
+            examsContainer.innerHTML = filtered.map(ex => {
+                const isFree = isSubjectFree(ex.subject);
+                const canAccess = isFree || isPremium || currentUser !== null;
+                const isLocked = !canAccess;
+
+                return `
+                    <div class="exam-card ${!isFree ? 'premium-card' : ''} ${isLocked ? 'locked-card' : ''}" data-id="${ex.id}">
+                        <div class="exam-image-wrap" onclick="${!isLocked ? `window.viewImage('${ex.imageUrl}')` : ''}">
+                            <img src="${ex.imageUrl}" alt="${ex.title}" loading="lazy" />
+                            <span class="exam-badge">${ex.subject}</span>
+                        </div>
+                        ${isLocked ? `
+                            <div class="lock-overlay">
+                                <div class="lock-icon">🔒</div>
+                                <div class="lock-text">هذه المادة مدفوعة</div>
+                                <button class="btn" onclick="document.getElementById('upgradeBtn').click()">⭐ اشتر الآن</button>
+                            </div>
+                        ` : ''}
+                        <div class="exam-body">
+                            <div class="exam-title">${ex.title}</div>
+                            <span class="exam-subject ${!isFree ? 'premium-tag' : ''}">${ex.subject} ${!isFree ? '⭐' : '✅ مجاني'}</span>
+                            <div class="exam-actions">
+                                ${!isLocked ? `
+                                    <a href="${ex.imageUrl}" target="_blank" class="btn btn-outline btn-sm">👁️ عرض</a>
+                                    <a href="${ex.imageUrl}" download class="btn btn-primary btn-sm">⬇️ تحميل</a>
+                                ` : `
+                                    <button class="btn btn-gold btn-sm" onclick="document.getElementById('upgradeBtn').click()">⭐ فتح</button>
+                                `}
+                                ${isAdmin ? `<button class="btn btn-danger btn-sm delete-exam" data-id="${ex.id}">🗑️</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Delete handlers
+            document.querySelectorAll('.delete-exam').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    if (confirm('⚠️ هل أنت متأكد من حذف هذا الامتحان نهائياً؟')) {
+                        remove(ref(database, `exams/${id}`))
+                            .then(() => showToast('✅ تم حذف الامتحان', 'success'))
+                            .catch(() => showToast('❌ فشل الحذف', 'error'));
+                    }
+                });
+            });
+        }
+
+        // ============================================================
+        //  LOAD EXAMS (Realtime)
+        // ============================================================
+        function loadExams() {
+            onValue(examsRef, (snapshot) => {
+                const data = snapshot.val();
+                allExams = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+                renderExams(currentSubject);
+                if (isAdmin) renderAdminList();
+            });
+        }
+
+        // ============================================================
+        //  ADMIN LIST
+        // ============================================================
+        function renderAdminList() {
+            if (!isAdmin) return;
+            const list = [...allExams].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (list.length === 0) {
+                adminExamsList.innerHTML = `<p style="color:var(--gray-600);">لا توجد امتحانات مضافة بعد</p>`;
+                return;
+            }
+            adminExamsList.innerHTML = list.map(ex => {
+                const isFree = isSubjectFree(ex.subject);
+                return `
+                    <div class="admin-exam-item">
+                        <div class="info">
+                            <span class="title">${ex.title}</span>
+                            <span class="subject-tag ${!isFree ? 'premium-tag' : ''}">${ex.subject} ${!isFree ? '⭐' : '✅'}</span>
+                            <span style="font-size:0.75rem;color:var(--gray-600);">${new Date(ex.createdAt).toLocaleDateString('ar-EG')}</span>
+                        </div>
+                        <button class="btn btn-danger btn-sm delete-exam" data-id="${ex.id}">🗑️ حذف</button>
+                    </div>
+                `;
+            }).join('');
+
+            adminExamsList.querySelectorAll('.delete-exam').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    if (confirm('⚠️ حذف الامتحان نهائياً؟')) {
+                        remove(ref(database, `exams/${id}`))
+                            .then(() => showToast('✅ تم الحذف', 'success'))
+                            .catch(() => showToast('❌ فشل الحذف', 'error'));
+                    }
+                });
+            });
+        }
+
+        // ============================================================
+        //  UPLOAD EXAM
+        // ============================================================
+        async function uploadExam(subject, title, file) {
+            if (!file) {
+                showToast('⚠️ يرجى اختيار صورة', 'error');
+                return;
+            }
+            try {
+                const fileRef = storageRef(storage, `exams/${Date.now()}_${file.name}`);
+                const snapshot = await uploadBytes(fileRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                const newRef = push(examsRef);
+                await set(newRef, {
+                    subject,
+                    title: title || 'امتحان 2026',
+                    imageUrl: downloadURL,
+                    createdAt: Date.now()
+                });
+                showToast('✅ تم رفع الامتحان بنجاح', 'success');
+                uploadForm.reset();
+            } catch (error) {
+                console.error(error);
+                showToast('❌ فشل الرفع: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        //  EVENTS
+        // ============================================================
+
+        // Subjects
+        subjectsContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.subject-chip');
+            if (!chip) return;
+
+            const subject = chip.dataset.subject;
+            if (isSubjectPremium(subject) && !canAccessSubject(subject)) {
+                showToast('🔒 هذه المادة مدفوعة، اشترك للوصول إليها', 'error');
+                premiumModal.classList.add('active');
+                return;
+            }
+
+            subjectsContainer.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentSubject = subject;
+            renderExams(currentSubject);
+        });
+
+        // Image modal
+        window.viewImage = (url) => {
+            modalImage.src = url;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Home
+        homeBtn.addEventListener('click', () => {
+            currentSubject = 'الكل';
+            document.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('active'));
+            document.querySelector('[data-subject="الكل"]').classList.add('active');
+            renderExams('الكل');
+            adminPanel.classList.add('hidden');
+        });
+
+        // Admin toggle
+        adminToggleBtn.addEventListener('click', () => {
+            adminPanel.classList.toggle('hidden');
+            if (!adminPanel.classList.contains('hidden') && isAdmin) {
+                renderAdminList();
+            }
+        });
+
+        // File upload area click
+        fileUploadArea.addEventListener('click', () => imageFile.click());
+
+        // Upload form
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!isAdmin) {
+                showToast('⚠️ يجب تسجيل الدخول كأدمن', 'error');
+                return;
+            }
+            const subject = subjectSelect.value;
+            const title = examTitle.value.trim() || 'امتحان 2026';
+            const file = imageFile.files[0];
+            uploadExam(subject, title, file);
+        });
+
+        // Enter key on login fields
+        adminPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+        adminEmail.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+
+        // ============================================================
+        //  DEMO DATA
+        // ============================================================
+        function seedDemoData() {
+            const demoExams = [
+                { subject: 'اللغة العربية', title: 'امتحان عربي 2026 - دور أول', imageUrl: 'https://placehold.co/600x400/0b2b4a/white?text=عربي+2026+مجاني' },
+                { subject: 'اللغة العربية', title: 'امتحان عربي 2026 - دور ثاني', imageUrl: 'https://placehold.co/600x400/1a4a7a/white?text=عربي+دور+ثاني' },
+                { subject: 'الفيزياء', title: 'امتحان فيزياء 2026 - نموذج أ', imageUrl: 'https://placehold.co/600x400/1a5fb4/white?text=فيزياء+2026' },
+                { subject: 'الفيزياء', title: 'امتحان فيزياء 2026 - نموذج ب', imageUrl: 'https://placehold.co/600x400/2a7de1/white?text=فيزياء+B' },
+                { subject: 'الكيمياء', title: 'امتحان كيمياء 2026', imageUrl: 'https://placehold.co/600x400/2a7de1/white?text=كيمياء+2026' },
+                { subject: 'الأحياء', title: 'امتحان أحياء 2026', imageUrl: 'https://placehold.co/600x400/1f6b4a/white?text=أحياء+2026' },
+                { subject: 'الرياضيات', title: 'امتحان رياضيات 2026', imageUrl: 'https://placehold.co/600x400/9b6b2a/white?text=رياضيات+2026' },
+                { subject: 'اللغة الإنجليزية', title: 'امتحان إنجليزي 2026', imageUrl: 'https://placehold.co/600x400/6b4f8a/white?text=English+2026' }
+            ];
+            demoExams.forEach((ex, idx) => {
+                const r = push(examsRef);
+                set(r, { ...ex, createdAt: Date.now() - idx * 100000 });
+            });
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        loadExams();
+
+        // Seed demo data if empty
+        setTimeout(() => {
+            if (allExams.length === 0) {
+                seedDemoData();
+                setTimeout(() => loadExams(), 500);
+            }
+        }, 1500);
+
+        // تحديث واجهة المواد المدفوعة
+        setTimeout(updatePremiumUI, 300);
+
+        console.log('🚀 امتحانات 2026 - فريميوم (العربي مجاني، الباقي مدفوع)');
+        console.log('📌 للدخول كأدمن: admin@exam.com / admin2026');
+        console.log('📌 للتجربة: سجل دخول بأي بريد وكلمة مرور للحصول على اشتراك مميز');
+    </script>
 </body>
 </html>
